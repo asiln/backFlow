@@ -1,0 +1,10 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>body{font:12px Inter,system-ui,sans-serif;margin:12px}textarea{width:100%;height:440px;box-sizing:border-box;font:11px monospace}button{margin-top:8px;padding:8px 12px;border:0;border-radius:6px;background:#5b38d6;color:#fff;font-weight:600;cursor:pointer}</style>
+<div id="s">Running experiments...</div>
+<textarea id="t" readonly></textarea>
+<button id="c">Copy all</button>
+<script>
+onmessage = e => { const m = e.data.pluginMessage; if (!m) return; if (m.text != null) document.getElementById('t').value = m.text; if (m.status) document.getElementById('s').textContent = m.status; };
+document.getElementById('c').onclick = () => { const t = document.getElementById('t'); t.select(); document.execCommand('copy'); };
+</script>

@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  body{font:12px Inter,system-ui,sans-serif;margin:12px;color:#222}
+  textarea{width:100%;height:110px;box-sizing:border-box;font:11px monospace}
+  input[type=text]{width:100%;box-sizing:border-box;padding:4px}
+  button{margin-top:8px;padding:8px 12px;border:0;border-radius:6px;background:#5b38d6;color:#fff;font-weight:600;cursor:pointer}
+  button.sec{background:#ddd;color:#222}
+  button:disabled{opacity:.5;cursor:default}
+  #log{margin-top:8px;white-space:pre-wrap;font-size:11px;max-height:190px;overflow:auto;background:#f6f6f6;padding:6px;border-radius:4px}
+  label{display:block;margin:6px 0 2px;font-weight:600}
+  label.chk{font-weight:400;display:flex;gap:6px;align-items:center}
+  progress{width:100%;height:10px;margin-top:8px}
+  #prog{font-size:11px;color:#666}
+</style>
+<label>Paste JSON from the extractor</label>
+<textarea id="t" placeholder="{&quot;kheezFigma&quot;:1,&quot;frames&quot;:[...]}"></textarea>
+<label>or choose the .figma.json file</label>
+<input type="file" id="f" accept=".json,application/json">
+<label>Section name</label>
+<input type="text" id="sec" placeholder="defaults to the batch name">
+<label class="chk"><input type="checkbox" id="bind"> Bind colours to local variables</label>
+<label class="chk"><input type="checkbox" id="auto" checked> Auto layout (when the JSON has it)</label>
+<button id="go">Build layers</button> <button id="cancel" class="sec" disabled>Cancel</button>
+<progress id="bar" value="0" max="1" hidden></progress>
+<div id="prog"></div>
+<div id="log"></div>
+<script>
+const $ = id => document.getElementById(id), log = m => { const l = $('log'); l.textContent += m + '\n'; l.scrollTop = l.scrollHeight; };
+$('f').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $('t').value = await f.text(); log('Loaded ' + f.name + ' (' + Math.round(f.size / 1024) + ' KB)');
+  try { const d = JSON.parse($('t').value); if (d.name && !$('sec').value) $('sec').value = d.name; } catch (e) {}
+};
+$('go').onclick = () => {
+  let data; try { data = JSON.parse($('t').value); } catch (e) { log('Invalid JSON: ' + e.message); return; }
+  if (!data.frames) { log('Not an extractor file (no "frames").'); return; }
+  $('log').textContent = ''; $('go').disabled = true; $('cancel').disabled = false; $('bar').hidden = false;
+  parent.postMessage({ pluginMessage: { type: 'build', data, opts: { bindVars: $('bind').checked, autoLayout: $('auto').checked, sectionName: $('sec').value.trim() || null } } }, '*');
+};
+$('cancel').onclick = () => parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+onmessage = e => {
+  const m = e.data.pluginMessage; if (!m) return;
+  if (m.log) log(m.log);
+  if (m.progress) { $('bar').max = m.progress.total; $('bar').value = m.progress.done; $('prog').textContent = m.progress.done + ' / ' + m.progress.total + ' layers  ' + (m.progress.screen || ''); }
+  if (m.finished) { $('go').disabled = false; $('cancel').disabled = true; }
+};
+</script>

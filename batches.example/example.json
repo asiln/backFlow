@@ -1,0 +1,12 @@
+{
+  "phone": "test-user-id",
+  "width": 390,
+  "height": 844,
+  "screens": [
+    { "name": "App / Home / 390", "path": "/" },
+    { "name": "App / Settings / Sheet open / 390", "path": "/settings", "delayMs": 3000,
+      "setup": "click('^Edit profile$'); await sleep(800); return document.body.innerText.slice(0, 80)" },
+    { "name": "App / Long page / 390", "path": "/pricing", "fullPage": true },
+    { "name": "App / Dialog only / 390", "path": "/settings", "selector": "[role=dialog]", "backdrop": true }
+  ]
+}

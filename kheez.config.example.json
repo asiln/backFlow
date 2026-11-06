@@ -1,0 +1,9 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "apiUrl": "http://localhost:8000",
+  "apiPrefix": "/api/v1",
+  "locale": "en-US",
+  "login": { "path": "/auth/login", "identifierField": "identifier", "passwordField": "password" },
+  "localStorage": { "onboarding-done": "1" },
+  "tutorialKeys": ["onboarding-done"]
+}
