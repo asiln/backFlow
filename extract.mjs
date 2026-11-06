@@ -2,12 +2,12 @@
 // batch: { "phone": "test-user-id", "width": 390, "height": 844, "base": "http://localhost:3000", "fullPage": false,
 //          "screens": [ { "name": "Athlete / Dashboard", "path": "/dashboard", "setup": "click('^ok$')", "delayMs": 2500,
 //                         "tutorial": false, "fullPage": true, "selector": "[role=dialog]", "backdrop": true } ] }
-// Local app only. Test accounts only. Credentials and app specifics come from config.mjs (kheez.config.json, $KHEEZ_TEST_PASSWORD).
+// Local app only. Test accounts only. Credentials and app specifics come from config.mjs (figma-lift.config.json, $FIGMA_LIFT_TEST_PASSWORD).
 // Never point this at production.
 // Also importable: import { runBatch } from './extract.mjs'
-import { chromium } from 'playwright-core';
 import { normalize, summarize } from './normalize.mjs';
 import { loadConfig } from './config.mjs';
+import { launchBrowser } from './browser.mjs';
 import fs from 'fs'; import path from 'path'; import os from 'os'; import { fileURLToPath, pathToFileURL } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -53,12 +53,9 @@ export async function runBatch(batchFile, outFile, opts = {}) {
   const api = (batch.api || CFG.apiUrl) + CFG.apiPrefix;
   if (!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(base)) throw new Error('Refusing: base must be localhost');
 
-  const root = path.join(os.homedir(), 'AppData/Local/ms-playwright');
-  const dir = fs.readdirSync(root).filter((d) => /^chromium-\d+$/.test(d)).sort().pop();
-  const exe = path.join(root, dir, 'chrome-win64/chrome.exe');
   const walker = fs.readFileSync(path.join(here, 'walker.js'), 'utf8');
 
-  const browser = await chromium.launch({ executablePath: exe, headless: true });
+  const browser = await launchBrowser({ headless: true });
   const frames = [];
   const report = [];
   let ctx;
@@ -69,7 +66,7 @@ export async function runBatch(batchFile, outFile, opts = {}) {
     if (batch.phone && fs.existsSync(stateFile)) ctxOpts.storageState = stateFile;
     ctx = await browser.newContext(ctxOpts);
     if (batch.phone && !ctxOpts.storageState) {
-      if (!CFG.password) throw new Error('No test password: set KHEEZ_TEST_PASSWORD (or "password" in kheez.config.json)');
+      if (!CFG.password) throw new Error('No test password: set FIGMA_LIFT_TEST_PASSWORD (or "password" in figma-lift.config.json)');
       const r = await ctx.request.post(`${api}${CFG.login.path}`, { data: { [CFG.login.identifierField]: batch.phone, [CFG.login.passwordField]: CFG.password } });
       if (!r.ok()) throw new Error('login failed ' + r.status());
       await ctx.storageState({ path: stateFile });
@@ -106,7 +103,7 @@ export async function runBatch(batchFile, outFile, opts = {}) {
         }
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(400);
-        await page.evaluate((o) => { window.__kheezOpts = o; }, { selector: s.selector || null, backdrop: !!s.backdrop });
+        await page.evaluate((o) => { window.__figmaLiftOpts = o; }, { selector: s.selector || null, backdrop: !!s.backdrop });
         const tree = await page.evaluate(walker);
 
         // canvases/videos: replace the (black) JS readback with a real screenshot of just that element
@@ -114,19 +111,19 @@ export async function runBatch(batchFile, outFile, opts = {}) {
         (function collect(n) { if (n.shot) shots.push(n); (n.children || []).forEach(collect); })(tree);
         for (const n of shots) {
           try {
-            await page.evaluate(() => { const st = document.createElement('style'); st.id = '__kz_shot_style'; st.textContent = 'html,body{background:transparent!important} *{transition:none!important;animation:none!important} body *{visibility:hidden!important}'; document.head.appendChild(st); });
+            await page.evaluate(() => { const st = document.createElement('style'); st.id = '__fl_shot_style'; st.textContent = 'html,body{background:transparent!important} *{transition:none!important;animation:none!important} body *{visibility:hidden!important}'; document.head.appendChild(st); });
             await page.waitForTimeout(60);
-            await page.evaluate((id) => { const el = document.querySelector('[data-kz-shot="' + id + '"]'); el.style.setProperty('visibility', 'visible', 'important'); }, n.shot);
-            const buf = await page.locator('[data-kz-shot="' + n.shot + '"]').screenshot({ omitBackground: true, timeout: 8000 });
+            await page.evaluate((id) => { const el = document.querySelector('[data-fl-shot="' + id + '"]'); el.style.setProperty('visibility', 'visible', 'important'); }, n.shot);
+            const buf = await page.locator('[data-fl-shot="' + n.shot + '"]').screenshot({ omitBackground: true, timeout: 8000 });
             let data = 'data:image/png;base64,' + buf.toString('base64');
             if (buf.length > 250000) { // big opaque shader/video frame: JPEG is ~10x smaller and visually identical
-              const jb = await page.locator('[data-kz-shot="' + n.shot + '"]').screenshot({ type: 'jpeg', quality: 85, timeout: 8000 });
+              const jb = await page.locator('[data-fl-shot="' + n.shot + '"]').screenshot({ type: 'jpeg', quality: 85, timeout: 8000 });
               if (jb.length < buf.length) data = 'data:image/jpeg;base64,' + jb.toString('base64');
             }
             n.data = data;
             n.iw = Math.round(n.w); n.ih = Math.round(n.h); n.fit = 'FILL'; delete n.failed; n.viaShot = true;
           } catch (e) { n.failed = 'screenshot: ' + String(e && e.message || e).slice(0, 120); }
-          finally { await page.evaluate((id) => { const st = document.getElementById('__kz_shot_style'); if (st) st.remove(); const el = document.querySelector('[data-kz-shot="' + id + '"]'); if (el) el.style.removeProperty('visibility'); }, n.shot).catch(() => {}); }
+          finally { await page.evaluate((id) => { const st = document.getElementById('__fl_shot_style'); if (st) st.remove(); const el = document.querySelector('[data-fl-shot="' + id + '"]'); if (el) el.style.removeProperty('visibility'); }, n.shot).catch(() => {}); }
         }
 
         // cross-origin images the page could not read: download via Playwright, convert in page
@@ -143,13 +140,13 @@ export async function runBatch(batchFile, outFile, opts = {}) {
             const body = await resp2.body();
             if (body.length > 15e6) throw new Error('too big');
             const mime = (resp2.headers()['content-type'] || 'image/png').split(';')[0];
-            const res = await page.evaluate(([u, h]) => window.__kheezConvert(u, h), [`data:${mime};base64,${body.toString('base64')}`, n.hint]);
+            const res = await page.evaluate(([u, h]) => window.__figmaLiftConvert(u, h), [`data:${mime};base64,${body.toString('base64')}`, n.hint]);
             if (!res || res.error) throw new Error(res ? res.error : 'convert failed');
             n.data = res.data;
             if (n.k === 'img') { n.mode = /contain/.test(n.sizeCss || '') ? 'FIT' : 'FILL'; n.iw = res.w; n.ih = res.h; }
             else {
               n.iw = res.w; n.ih = res.h;
-              const pl = await page.evaluate((a) => window.__kheezPlace(a), { bw: n.hint.w, bh: n.hint.h, iw: res.w, ih: res.h, fit: n.fitArgs ? n.fitArgs.fit : 'cover', pos: n.fitArgs ? n.fitArgs.pos : null });
+              const pl = await page.evaluate((a) => window.__figmaLiftPlace(a), { bw: n.hint.w, bh: n.hint.h, iw: res.w, ih: res.h, fit: n.fitArgs ? n.fitArgs.fit : 'cover', pos: n.fitArgs ? n.fitArgs.pos : null });
               n.fit = pl.mode; if (pl.tf) n.tf = pl.tf;
             }
             delete n.failed; delete n.needsFetch;
@@ -244,7 +241,7 @@ export async function runBatch(batchFile, outFile, opts = {}) {
     (function c(n) { intern(n); (n.layers || []).forEach(intern); (n.children || []).forEach(c); })({ children: frames });
 
     fs.mkdirSync(path.dirname(outFile), { recursive: true });
-    const out = { kheezFigma: 1, name: path.basename(batchFile, '.json'), frames };
+    const out = { figmaLift: 1, name: path.basename(batchFile, '.json'), frames };
     if (Object.keys(assets).length) out.assets = assets;
     fs.writeFileSync(outFile, JSON.stringify(out));
     log(JSON.stringify(report, null, 1));

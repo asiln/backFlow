@@ -212,8 +212,8 @@ async function onScreen({ page, ctx, tree, screen, base }) {
   const doc = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${faceCss}\nhtml,body{margin:0;padding:0;background:#fff}*{-webkit-font-smoothing:auto}</style><div style="position:relative;width:${tree.w}px;height:${tree.h}px;overflow:hidden;background:${tree.fill ? rgba(tree.fill) : '#fff'}">${body.replace(/^<div /, '<div ')}</div>`;
   const rp = await ctx.newPage();
   await rp.setViewportSize({ width: tree.w, height: Math.max(tree.h, 100) });
-  await rp.route(base + '/__kheez_render', (rt) => rt.fulfill({ contentType: 'text/html; charset=utf-8', body: doc }));
-  await rp.goto(base + '/__kheez_render', { waitUntil: 'load' });
+  await rp.route(base + '/__figma_lift_render', (rt) => rt.fulfill({ contentType: 'text/html; charset=utf-8', body: doc }));
+  await rp.goto(base + '/__figma_lift_render', { waitUntil: 'load' });
   await rp.evaluate(() => document.fonts.ready);
   await rp.waitForTimeout(500);
   const render = await rp.screenshot({ clip: { x: 0, y: 0, width: tree.w, height: tree.h } });

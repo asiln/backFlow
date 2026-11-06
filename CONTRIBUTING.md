@@ -15,7 +15,7 @@ Thanks for helping. Figma Lift turns a running web app into real Figma auto-layo
 git clone https://github.com/asiln/figma-lift.git
 cd figma-lift
 npm install
-cp kheez.config.example.json kheez.config.json   # then edit it for your app
+cp figma-lift.config.example.json figma-lift.config.json   # then edit it for your app
 ```
 
 You need Node 18 or newer and a Chromium that Playwright can drive.

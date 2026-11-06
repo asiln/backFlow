@@ -1,6 +1,6 @@
 {
-  "name": "Kheez Import (JSON to layers)",
-  "id": "kheez-import-local-1",
+  "name": "Figma Lift Import",
+  "id": "figma-lift-import-1",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",

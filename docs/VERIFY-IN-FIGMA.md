@@ -6,7 +6,7 @@ The auto-layout import relies on nine Figma runtime behaviours that the typings 
 
 1. Open a scratch Figma file (desktop app). Install Vazirmatn Regular from Google Fonts if V9 should run.
 2. Plugins, Development, Import plugin from manifest, choose `plugin/verify/manifest.json`.
-3. Run Plugins, Development, Kheez Auto-layout Verify. Wait a few seconds, press Copy all, and send the text back.
+3. Run Plugins, Development, Figma Lift Auto-layout Verify. Wait a few seconds, press Copy all, and send the text back.
 4. Optional, for V9: `node plugin/verify/chrome-ref.mjs` prints Chrome's widths for the same ten strings (needs the local app on :3000). Compare the two lists; a consistent ratio tells us the text tolerance.
 
 ## What each experiment answers

@@ -18,7 +18,7 @@ for (const f of files) {
   const r = spawnSync(process.execPath, ['--check', f], { encoding: 'utf8' });
   if (r.status !== 0) { bad++; console.error('FAIL', f, '\n' + r.stderr); }
 }
-for (const f of ['plugin/manifest.json', 'plugin/verify/manifest.json', 'package.json', 'kheez.config.example.json', 'batches.example/example.json']) {
+for (const f of ['plugin/manifest.json', 'plugin/verify/manifest.json', 'package.json', 'figma-lift.config.example.json', 'batches.example/example.json']) {
   try { JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { bad++; console.error('BAD JSON', f, e.message); }
 }
 console.log(`${files.length} scripts checked, ${bad} problem(s)`);

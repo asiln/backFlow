@@ -1,6 +1,16 @@
-# figma-export
+# Figma Lift
 
-Turns the running local app into Figma layers with no Figma MCP calls.
+Turn a running web app into **real Figma auto-layout**: editable text, vector icons, images, gradients and shadows, with Hug / Fill / Fixed sizing inferred from how the page actually renders. Works with React, Tailwind or any site, because it reads the rendered page, not your source code. No Figma API quota: extraction runs locally and a small Figma plugin builds the layers.
+
+> Use it on **local or staging apps with test accounts only**. The extractor refuses non-localhost origins. Exports can contain real app text and images, so keep `out/` private.
+
+## Requirements
+
+- Node 18 or newer
+- A Chromium: `npx playwright-core install chromium` (or set `FIGMA_LIFT_CHROME` to a Chrome/Chromium binary; system Chrome and Edge are also tried)
+- Figma desktop app, to run the development plugin
+
+## How it works
 
 1. `walker.js` runs inside the page and reads computed styles, geometry, text, SVG icons and images.
 2. `extract.mjs` logs in (local test accounts only), opens each screen in a batch, runs the walker, writes `out/<batch>.figma.json`, and reports problems (404, redirect to login, `???`, error toasts, spinners, empty screens).
@@ -11,7 +21,7 @@ Turns the running local app into Figma layers with no Figma MCP calls.
 ## Run
 
 ```
-cd kheez-figma-export
+cd figma-lift
 npm install
 node extract.mjs batches/test.json                 # -> out/test.figma.json
 node extract.mjs batches/test.json --only dash     # only screens whose name contains "dash"
@@ -60,7 +70,7 @@ Each report entry has `warnings` (strings) and `broken` (true if any starts with
 ## Install the plugin once (Figma desktop app)
 
 Plugins, then Development, then Import plugin from manifest, then choose `plugin/manifest.json`.
-Run it from Plugins, then Development, then Kheez Import. Paste or choose the JSON, then Build layers.
+Run it from Plugins, then Development, then Figma Lift Import. Paste or choose the JSON, then Build layers.
 
 Options in the plugin window:
 
@@ -70,7 +80,7 @@ Options in the plugin window:
 
 ## JSON schema (summary)
 
-`{ kheezFigma: 1, name?, assets?: { id: dataUrl }, frames: [node] }`
+`{ figmaLift: 1, name?, assets?: { id: dataUrl }, frames: [node] }`
 
 Node: `{ t: 'frame'|'text'|'svg'|'img', name, x, y, w, h, ... }`. Existing fields: `fill, stroke{c,w[4],style}, radius, shadow[], blur, bblur, opacity, clip, layout, children, text, font, svg, data`. Optional fields added later (older consumers can ignore them):
 
@@ -139,8 +149,8 @@ Known limits: BASELINE alignment is approximated by geometry (and may need an `a
 
 Nothing project-specific or secret lives in the tool itself.
 
-- `kheez.config.json` (gitignored, copy from `kheez.config.example.json`): base and API URLs, login endpoint and field names, locale, localStorage keys to pre-set. Override the path with `$KHEEZ_CONFIG`.
-- Test password: `$KHEEZ_TEST_PASSWORD` (never committed, never in a batch file).
+- `figma-lift.config.json` (gitignored, copy from `figma-lift.config.example.json`): base and API URLs, login endpoint and field names, locale, localStorage keys to pre-set. Override the path with `$FIGMA_LIFT_CONFIG`.
+- Test password: `$FIGMA_LIFT_TEST_PASSWORD` (never committed, never in a batch file).
 - `batches/` (gitignored): your real screen lists. `batches.example/` shows the format.
 - `out/` (gitignored): exports. `state-*.json` (gitignored): saved sessions.
 - Use local or staging apps and test accounts only. The extractor refuses non-localhost origins.

@@ -6,10 +6,10 @@ Goal: post-process `out/*.figma.json` (no new browser run) into (A) reusable com
 ## 0. Sources, evidence, honesty
 
 Verified locally (source of truth, cited as `d.ts:LINE` = `plugin-api-standalone.d.ts` in
-`C:\Users\asiln\.claude\plugins\synced\041382b1-e080-4cf2-bca0-f23038ce49f2_05462d0b-2426-4e6f-94d2-25761a3255a3\figma~g2\skills\figma-use\references\`):
+the Figma plugin typings):
 `component-patterns.md` (cited `cp.md:LINE`), `gotchas.md` (`gotchas.md:LINE`), `variable-patterns.md` (`vp.md`), `text-style-patterns.md`, `effect-style-patterns.md`, `working-with-design-systems/wwds-components--using.md` (`wwds-using`).
 Repo code read: `README.md`, `normalize.mjs` (header + structure), `plugin/code.js` (whole), `docs/AUTO-LAYOUT-SPEC.md`, `docs/VERIFY-IN-FIGMA.md` (header), a real export `out/test-autolayout-v4.figma.json` (25 screens, 1534 nodes).
-Design-system source: `ds-ledger.json` (scratchpad `figma-tools/`), `ajdar/frontend/tailwind.config.js`, `ajdar/DESIGN.md` (read only).
+Design-system source: an inventory of the design system already in the Figma file, and the project's `tailwind.config.js` (read only).
 Own measurements: a throwaway harvest script (scratchpad `harvest.mjs`, `proto.mjs`) over the 42 real exports in `out/` (probe/test/shot files excluded): **443 screens, 91,383 nodes**. Numbers quoted as "measured" come from there.
 
 Not verified and marked `UNVERIFIED`: anything about public Figma docs/pricing (no WebFetch was done), plugin manifest multi-command syntax, runtime performance numbers, behaviour that the typings do not settle. Section 9 lists experiments (E1-E20) to settle them in real Figma before depending on them. Marked `VERIFY` = needs experiment.
@@ -137,7 +137,7 @@ Name = `Group/Name` assembled from first available source:
 1. Owner decision file / DS match (`ds.name`), e.g. `Button`.
 2. Semantic role prefix of member names (the part before ` · `), voted by majority: `button -> Button`, `link -> Link`, `input -> Input`, `item -> List Item`, `tab -> Tab`, `alert -> Alert`, `aside -> Sidebar`, `header -> Header`, `tr -> Table Row`, `th/td` skipped. Table lives in `ds.config.json: nameHints.roles`.
 3. aria-label / data-testid / `input#auth-identifier` style ids of members (walker already puts them in names): longest common prefix of ids with digits/uuids stripped.
-4. Shape-based guess (project hint table): `{dim: 44, text+svg, radius pill}` -> `Pill`, circle with 1 text -> `Avatar`/`Badge`, `h<=28, radius 99, fill tint` -> `Badge`, `kheez 64px fixed-bottom` -> `Bottom Nav`. Config-extensible (`nameHints.shapes`).
+4. Shape-based guess (project hint table): `{dim: 44, text+svg, radius pill}` -> `Pill`, circle with 1 text -> `Avatar`/`Badge`, `h<=28, radius 99, fill tint` -> `Badge`, `64px fixed-bottom bar` -> `Bottom Nav`. Config-extensible (`nameHints.shapes`).
 5. Fallback: `Component <short hash>` and confidence penalty.
 
 Variant suffix is not part of the name (it becomes variant properties, 2.4). Collisions get ` 2`, ` 3` and a report flag. Group = first token before `/`; defaults from role (`Buttons`, `Cards`, `Navigation`, `Lists`, `Forms`, `Feedback`, `Other`).
@@ -201,9 +201,9 @@ Separate plugin `plugin-components/` (reads `_library.json`) builds the masters 
 
 ### 2.1 Where masters live, and the registry
 
-- A page named `Kheez Components` (create if missing: `figma.createPage()` d.ts:447; loading other pages needs `figma.loadAllPagesAsync()`, `documentAccess: dynamic-page` in `plugin/manifest.json`, d.ts:8092-8129).
+- A page named `Lift Components` (create if missing: `figma.createPage()` d.ts:447; loading other pages needs `figma.loadAllPagesAsync()`, `documentAccess: dynamic-page` in `plugin/manifest.json`, d.ts:8092-8129).
 - One Section per library group (`Buttons`, `Cards`, `Icons` ...), laid out by a simple grid; components inside Sections (Section does not auto-resize, `gotchas.md:804`, so size it explicitly like `plugin/code.js` does at the end of the import).
-- Each main component / component set is tagged: `node.setSharedPluginData('kheez','cmp', id)`, `('kheez','sig', S+M hash)`, `('kheez','ver', libVersion)`, `('kheez','conf', '87')` (d.ts:4152-4172). Lookup is one call: `page.findAllWithCriteria({ types:['COMPONENT','COMPONENT_SET'], sharedPluginData:{ namespace:'kheez', keys:['cmp'] } })` (d.ts:4704-4761); this is indexed and fast on big pages (d.ts:4704, `figma.skipInvisibleInstanceChildren = true` d.ts:60 for traversals). Result goes into `Map<cmpId, node>`.
+- Each main component / component set is tagged: `node.setSharedPluginData('figmalift','cmp', id)`, `('figmalift','sig', S+M hash)`, `('figmalift','ver', libVersion)`, `('figmalift','conf', '87')` (d.ts:4152-4172). Lookup is one call: `page.findAllWithCriteria({ types:['COMPONENT','COMPONENT_SET'], sharedPluginData:{ namespace:'figmalift', keys:['cmp'] } })` (d.ts:4704-4761); this is indexed and fast on big pages (d.ts:4704, `figma.skipInvisibleInstanceChildren = true` d.ts:60 for traversals). Result goes into `Map<cmpId, node>`.
 - Idempotence: build only ids missing from the registry. If an id exists but `sig` differs, create a new node, rename the old `(superseded <date>)`, never delete.
 
 ### 2.2 Building a master
@@ -359,7 +359,7 @@ Images in masters hold the exemplar's image (or a neutral gray placeholder if th
 
 Match is computed in Node (`dsmatch.mjs`) against an inventory exported from the live file (2.8.1). Never by name alone.
 
-**2.8.1 Inventory export.** A command of `plugin-tokens/` (`Export inventory`) walks `Kheez Components` and `00 Design System` pages and writes `ds-inventory.json`: variables (id, key, name, collection, scopes, resolved value per mode), paint/text/effect styles (id, key, props), icon components (id, key, name, canonical SVG hash if the file keeps the source SVG in `setSharedPluginData('kheez','svg', canonical)`, else vector path data hash from `VectorPath`s), components/sets (id, key, name, property definitions, variant list, and a **fingerprint tree**: `{t, k, s, kids, fills: tokenOrRgba, radius, h, pad, gap}` using the same `view()` mapping as 1.1: FRAME/COMPONENT -> frame, TEXT -> text, VECTOR or frame-with-vectors -> svg, INSTANCE -> frame or `C:`). `ds-ledger.json` is an early hand-made subset of this and can seed it (names, ids, hex).
+**2.8.1 Inventory export.** A command of `plugin-tokens/` (`Export inventory`) walks `Lift Components` and `00 Design System` pages and writes `ds-inventory.json`: variables (id, key, name, collection, scopes, resolved value per mode), paint/text/effect styles (id, key, props), icon components (id, key, name, canonical SVG hash if the file keeps the source SVG in `setSharedPluginData('figmalift','svg', canonical)`, else vector path data hash from `VectorPath`s), components/sets (id, key, name, property definitions, variant list, and a **fingerprint tree**: `{t, k, s, kids, fills: tokenOrRgba, radius, h, pad, gap}` using the same `view()` mapping as 1.1: FRAME/COMPONENT -> frame, TEXT -> text, VECTOR or frame-with-vectors -> svg, INSTANCE -> frame or `C:`). `ds-ledger.json` is an early hand-made subset of this and can seed it (names, ids, hex).
 
 **2.8.2 Match score** between a cluster leader and a DS component (or each variant of a set):
 
@@ -434,7 +434,7 @@ Existing DS icon components (41) are named by Lucide names (`ChevronLeft`...). T
 
 ### 4.1 Harvest
 
-`tokens.mjs --in "out/**/*.figma.json" --tailwind ../ajdar/frontend/tailwind.config.js --inventory ds-inventory.json` walks every node once and counts, keeping `(count, screens, files, rolesHistogram)` per key:
+`tokens.mjs --in "out/**/*.figma.json" --tailwind ./tailwind.config.js --inventory ds-inventory.json` walks every node once and counts, keeping `(count, screens, files, rolesHistogram)` per key:
 
 | Family | Key | Source | Notes |
 |---|---|---|---|
@@ -502,15 +502,15 @@ Semantic naming comes from (in order): matching variable in `ds-inventory.json` 
 `plugin-tokens/` UI options: `Dry run (default on)`, `Create missing`, `Update values of existing (off)`, `Bind scope: components only / all screens`.
 
 Lookup, never duplicate:
-1. Variable: by `getVariableByIdAsync(existing.id)`; else by shared plugin data `kheez.tokenKey == key` over `getLocalVariablesAsync()`; else by `collection.name + '/' + name`. Found -> reuse (update value only when `Update values` is on and differs; never delete).
+1. Variable: by `getVariableByIdAsync(existing.id)`; else by shared plugin data `figmalift.tokenKey == key` over `getLocalVariablesAsync()`; else by `collection.name + '/' + name`. Found -> reuse (update value only when `Update values` is on and differs; never delete).
 2. New collection only if the target collection does not exist (existing: `Primitives`, `Color`, `Layout`; new tokens go to existing collections following the established naming; unmapped values go to a new collection `Imported (review)` with a single mode `Value`, `gotchas.md:149, 898`).
 3. Created variables set scopes explicitly (`gotchas.md:857`, scopes list d.ts:9201): bg/fill `["FRAME_FILL","SHAPE_FILL"]`, text `["TEXT_FILL"]`, border `["STROKE_COLOR"]`, icon `["SHAPE_FILL","STROKE_COLOR"]`, effect colour `["EFFECT_COLOR"]`, radius `["CORNER_RADIUS"]`, spacing `["GAP"]`, size `["WIDTH_HEIGHT"]`; code syntax `WEB` = Tailwind key (`variable.setVariableCodeSyntax('WEB','colors.surface2')`, d.ts:9426, as the ledger already does).
 4. Semantic variable values for colours with alpha: COLOR variable values carry `a` (vp.md:35-72); alias to a primitive when the base colour exists in `Primitives` (`VARIABLE_ALIAS`, vp.md:159-172) so the chain Primitives -> Color is preserved.
-5. Text styles: index `getLocalTextStylesAsync()` (d.ts:710) by `family|style|size|lh|ls`; match -> bind; missing and above thresholds -> `figma.createTextStyle()` (d.ts:679), `await figma.loadFontAsync`, `fontName`, `fontSize`, `lineHeight={unit:'PIXELS',value}`, `letterSpacing={unit:'PERCENT'|'PIXELS'}` (objects, not numbers, `gotchas.md:297`), name by the existing convention (`Text/<Role> <size> <Weight>`), `setSharedPluginData('kheez','tokenKey', key)`.
+5. Text styles: index `getLocalTextStylesAsync()` (d.ts:710) by `family|style|size|lh|ls`; match -> bind; missing and above thresholds -> `figma.createTextStyle()` (d.ts:679), `await figma.loadFontAsync`, `fontName`, `fontSize`, `lineHeight={unit:'PIXELS',value}`, `letterSpacing={unit:'PERCENT'|'PIXELS'}` (objects, not numbers, `gotchas.md:297`), name by the existing convention (`Text/<Role> <size> <Weight>`), `setSharedPluginData('figmalift','tokenKey', key)`.
 6. Effect styles: `figma.createEffectStyle()` (d.ts:685), effects array, colour variable bound with `setBoundVariableForEffect(effect,'color',var)` (d.ts:1227; returns a new effect).
 7. Gradient paints: `figma.createPaintStyle()` (d.ts:673). Gradient stops can carry a bound variable (`ColorStop.boundVariables`, d.ts:2507-2521; call form `UNVERIFIED`, E12).
 
-**Dry-run** performs every lookup and prints the same `tokens.json` statuses with real ids: "would create 14 variables (list), would create 3 text styles, would bind 18,230 fills", and writes a `kheez-dry-run.json` into the UI for download. No `create*`, no `set*` is called when dry-run is on (guard in one wrapper `W.create(kind, fn)`).
+**Dry-run** performs every lookup and prints the same `tokens.json` statuses with real ids: "would create 14 variables (list), would create 3 text styles, would bind 18,230 fills", and writes a `figma-lift-dry-run.json` into the UI for download. No `create*`, no `set*` is called when dry-run is on (guard in one wrapper `W.create(kind, fn)`).
 
 **Binding** (inside the import plugin and for components in `plugin-components`): replace the exact-RGBA map `loadColorVariables` by a keyed map `tokenKey -> Variable` built from `tok` keys (section 7.2) so binding no longer depends on re-matching floats, and so the *role* decides which variable of equal value is used (today the scoring is `Color` > other > `Primitives` only). Bindings by field: fills/strokes `setBoundVariableForPaint` (d.ts:1215), gap `setBoundVariable('itemSpacing',v)`, `counterAxisSpacing`, padding four fields, corner radii individual corners `topLeftRadius...` (vp.md:87-120), `strokeWeight`, text style `await t.setTextStyleIdAsync(id)` (d.ts:8572; batches of 100 with `Promise.all`), effect style `await n.setEffectStyleIdAsync(id)` (d.ts:5179). Text style first, then re-apply `runs` ranges (a style write replaces range overrides; VERIFY E11). Bind only when the value the plugin actually sets equals the variable's value (e.g. padding after `bw` subtraction).
 
@@ -518,7 +518,7 @@ Lookup, never duplicate:
 
 ### 4.6 Idempotence and naming rules
 
-- Every created variable/style carries `sharedPluginData('kheez','tokenKey', key)` and `('kheez','tokensVer', hash)`. Re-running finds by key, then by name, and does nothing if equal.
+- Every created variable/style carries `sharedPluginData('figmalift','tokenKey', key)` and `('figmalift','tokensVer', hash)`. Re-running finds by key, then by name, and does nothing if equal.
 - Names: variables `<role>/<name>` lower-kebab (`bg/surface-2`, `text/dim`, `tint/accent-15`, `border/accent-40`), numeric `spacing/<tw index>` (`spacing/3`), `radius/<tw name or px>`, `size/<name>`; text styles `Text/<Role> <size> <Weight>`, `Display/...`, `Mono/...` (existing); effects `Glow/..`, `Ring/..`, `Shadow/<sm|md|..>`. Collisions get `-2` and a `review` finding.
 - Never rename or delete existing variables/styles/components; the plugin only adds and (opt-in) updates values.
 
@@ -530,7 +530,7 @@ tokens.mjs        --in out/**/*.figma.json  --tailwind ... --inventory ds-invent
 plugin-tokens     (Figma) dry-run -> apply tokens.json; "Export inventory" -> ds-inventory.json
 componentize.mjs  --in out/**/*.figma.json --tokens out/enriched/tokens.json --inventory ds-inventory.json --decisions component-decisions.json
                   -> out/enriched/_library.json, out/enriched/<file>.figma.json (adds cmp/tok), components-report.{json,md,html}
-plugin-components (Figma) _library.json -> "Kheez Components" page (masters, sets, icons), registry tags
+plugin-components (Figma) _library.json -> "Lift Components" page (masters, sets, icons), registry tags
 plugin (import)   enriched/<file>.figma.json -> screens with instances + token bindings; verification report
 expand.mjs        enriched -> expand cmp back into plain trees; compare with the original JSON (Node round trip)
 ```
@@ -541,7 +541,7 @@ expand.mjs        enriched -> expand cmp back into plain trees; compare with the
 
 ### 5.2 Backward compatibility
 
-All additions are optional per-node fields: `cmp`, `tok`. Older plugin builds ignore them and build the retained `children`. Enriched files are written to `out/enriched/` (originals untouched). `cmp.stripped` / `--slim` is opt-in. `_library.json` is global; per-file JSON refers to it by `id`. `kheezFigma` stays `1`; add top-level `ds: { library: "_library.json", tokens: "tokens.json", ver: 1 }`.
+All additions are optional per-node fields: `cmp`, `tok`. Older plugin builds ignore them and build the retained `children`. Enriched files are written to `out/enriched/` (originals untouched). `cmp.stripped` / `--slim` is opt-in. `_library.json` is global; per-file JSON refers to it by `id`. `figmaLift` stays `1`; add top-level `ds: { library: "_library.json", tokens: "tokens.json", ver: 1 }`.
 
 ### 5.3 Incremental runs
 
@@ -655,7 +655,7 @@ interface LibIcon {
 ### 7.4 `ds.config.json` (project-specific, section 8)
 
 ```jsonc
-{ "tailwind": "../ajdar/frontend/tailwind.config.js",
+{ "tailwind": "./tailwind.config.js",
   "thresholds": { "occ": 3, "screens": 2, "minConf": 55, "colorDeltaE": 1.5, "alphaTol": 0.02 },
   "tokenMap": { "accent": { "fill":"bg/accent","text":"text/accent-soft","icon":"icon/accent-soft","stroke":"border/accent" } },
   "nameHints": { "roles": { "button":"Button","item":"List Item","aside":"Sidebar","tr":"Table Row" },
@@ -685,7 +685,7 @@ interface LibIcon {
 1. `components-report.html` + `component-decisions.json` (accept/reject/rename/merge/split) applied on the next `componentize.mjs` run (1.9).
 2. `tokens.json` `review` statuses edited by hand (target name, role) and re-fed with `--overrides tokens-overrides.json`.
 3. Plugin dry-run for tokens and components (`plugin-components` has the same `Dry run` switch: lists masters it would create).
-4. Band tags on component descriptions (`review` = yellow) and `kheez.conf` plugin data.
+4. Band tags on component descriptions (`review` = yellow) and `figmalift.conf` plugin data.
 5. `ds-verify.json` worst-offenders list.
 
 ### 8.3 What is project-agnostic and what is per-project
@@ -698,7 +698,7 @@ interface LibIcon {
 | Plugin instancing, overrides, ladder, verification | Fonts and `fontMap` (this project: Vazirmatn/Space Grotesk/JetBrains Mono; RTL ordering is already handled by `normalize.mjs`) |
 | Registry via shared plugin data | Role-prefix table (`nameHints.roles`), variant value dictionary (`variantNames`), group names, DS match mode |
 
-Principle for generalisation: no colour, name or font literal in code; every project-specific string lives in `ds.config.json` or in `tailwind.config.js`. Package as `kheez-ds` (Node CLI: `ds tokens`, `ds components`, `ds expand`) plus the two Figma plugins. RTL specifics (ordering by visual x) are upstream in `normalize.mjs`, so downstream steps are direction-agnostic.
+Principle for generalisation: no colour, name or font literal in code; every project-specific string lives in `ds.config.json` or in `tailwind.config.js`. Package as `figma-lift` (Node CLI: `ds tokens`, `ds components`, `ds expand`) plus the two Figma plugins. RTL specifics (ordering by visual x) are upstream in `normalize.mjs`, so downstream steps are direction-agnostic.
 
 ## 9. Experiments to run in real Figma first (extend `plugin/verify/`, new plugin `plugin/verify-ds/`)
 
@@ -773,7 +773,7 @@ Work split so that agents do not touch the same files. Each task lists owned pat
 | T3 Tokens plugin | `plugin-tokens/*` (manifest, code.js, ui.html) | T1 fixtures | dry-run, create-if-missing variables/text/effect styles, inventory export, idempotence |
 | T4 Component detector core | `componentize.mjs`, `tools/ds/components/{view,digest,cluster,nest,name,confidence,library}.mjs` | T1 | passes 1-4, tolerance clustering, naming, confidence, `_library.json` (no variants), enriched JSON with `cmp.id` + text overrides only |
 | T5 Icons | `tools/ds/icons/*` | T1 | `iconSig`, icon clustering, DS icon match from ledger/inventory, `icons[]` in the library |
-| T6 Components plugin | `plugin-components/*` | T1 fixtures | registry, `Kheez Components` page, masters, TEXT/BOOLEAN/INSTANCE_SWAP properties, icon components, dry-run |
+| T6 Components plugin | `plugin-components/*` | T1 fixtures | registry, `Lift Components` page, masters, TEXT/BOOLEAN/INSTANCE_SWAP properties, icon components, dry-run |
 | T7 Import plugin integration | `plugin/code.js`, `plugin/ui.html` (single owner) | T1 fixtures, T6 conventions | `tryInstance`, overrides, token binding by key, verify + ladder R0-R3, stats, `Use components` / `Bind tokens` options; legacy path untouched when fields absent |
 | T8 Round-trip verifier | `expand.mjs`, `tools/ds/verify/*` | T1, T4 | Node `expand` + compare (5.6.1), run in CI over `out/` |
 

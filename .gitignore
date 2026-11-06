@@ -4,7 +4,7 @@ out/
 state-*.json
 batches/
 private/
-kheez.config.json
+figma-lift.config.json
 *.dump
 *.bundle
 .impeccable

@@ -1,12 +1,11 @@
 // Prints Chrome's width/height for the same 10 strings the verify plugin measures in Figma (Vazirmatn 14px, line-height 20px).
-// usage: node plugin/verify/chrome-ref.mjs   (needs the local app on :3000 so the Vazirmatn @font-face is available)
-import { chromium } from 'playwright-core';
-import fs from 'fs'; import path from 'path'; import os from 'os';
-const root = path.join(os.homedir(), 'AppData/Local/ms-playwright');
-const dir = fs.readdirSync(root).filter((d) => /^chromium-\d+$/.test(d)).sort().pop();
-const browser = await chromium.launch({ executablePath: path.join(root, dir, 'chrome-win64/chrome.exe'), headless: true });
+// usage: node plugin/verify/chrome-ref.mjs   (needs your local app so the font's @font-face is available)
+import { launchBrowser } from '../../browser.mjs';
+import { loadConfig } from '../../config.mjs';
+// Any page of your app that loads the fonts you want to measure: node plugin/verify/chrome-ref.mjs [/path]
+const browser = await launchBrowser({ headless: true });
 const page = await browser.newPage();
-await page.goto('http://localhost:3000/auth/login', { waitUntil: 'networkidle' });
+await page.goto(loadConfig().baseUrl + (process.argv[2] || '/'), { waitUntil: 'networkidle' });
 const strs = ['ورود', 'شماره موبایل', 'رمز عبور', 'برنامه‌ای متناسب با هدف تو', 'حساب نداری؟ ثبت‌نام', 'ضمانت ۷ روزه', '۱٬۲۹۰٬۰۰۰', 'تومان برای ۳ ماه', 'شروع تمرین امروز', 'گزارش هفتگی'];
 const rows = await page.evaluate(async (list) => {
   await document.fonts.load('14px Vazirmatn'); await document.fonts.ready;

@@ -1,12 +1,12 @@
 // Runs INSIDE the page (evaluated as an async IIFE; returns a Promise of the node tree).
-// Options come from window.__kheezOpts = { selector?, backdrop? } (set by extract.mjs).
+// Options come from window.__figmaLiftOpts = { selector?, backdrop? } (set by extract.mjs).
 // Schema node: {t:'frame'|'text'|'svg'|'img', name, x,y,w,h (relative to parent),
 //   fill?, stroke?, radius?, shadow?, opacity?, clip?, layout?, children?, text?, font?, svg?, data?, ...}
 // Optional additions (all backward compatible, ignored by old consumers):
 //   layers (css-ordered background layers incl. images), fit/tf (image placement), runs (inline text styling),
 //   xf (rotation/flip matrix), blend, pos (fixed|sticky|absolute), shadow[].inset, font.shadow, needsFetch/failed (images).
 (async function () {
-  const OPTS = window.__kheezOpts || {};
+  const OPTS = window.__figmaLiftOpts || {};
   const FONT_MAP = [
     [/vazirmatn/i, 'Vazirmatn'],
     [/space.?grotesk/i, 'Space Grotesk'],
@@ -157,8 +157,8 @@
     return p;
   }
   // Used by extract.mjs as a fallback for cross-origin images it downloaded itself (data: url input).
-  window.__kheezPlace = (a) => place(a.bw, a.bh, a.iw, a.ih, a.fit, a.pos);
-  window.__kheezConvert = (dataUrl, hint) => convertUrl(dataUrl, hint).catch((e) => ({ error: String(e && e.message || e) }));
+  window.__figmaLiftPlace = (a) => place(a.bw, a.bh, a.iw, a.ih, a.fit, a.pos);
+  window.__figmaLiftConvert = (dataUrl, hint) => convertUrl(dataUrl, hint).catch((e) => ({ error: String(e && e.message || e) }));
 
   // Compute how an image of (iw,ih) sits in a (bw,bh) box.
   // fit: fill|cover|contain|none|scale-down. pos: [x,y] each {pct}|{px}. size: [sw,sh] explicit px (optional)
@@ -639,7 +639,7 @@
         };
         if (tag === 'img') node.alt = el.alt || undefined;
         // WebGL/2D canvases and videos read back black or empty via JS once painted: tag them so extract.mjs can take a real element screenshot
-        if (tag === 'canvas' || tag === 'video') { window.__kzShot = (window.__kzShot || 0) + 1; el.setAttribute('data-kz-shot', String(window.__kzShot)); node.shot = window.__kzShot; }
+        if (tag === 'canvas' || tag === 'video') { window.__flShot = (window.__flShot || 0) + 1; el.setAttribute('data-fl-shot', String(window.__flShot)); node.shot = window.__flShot; }
         tasks(async () => {
           let url = null;
           try {

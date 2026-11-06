@@ -1,6 +1,6 @@
 // Project configuration. Nothing app-specific or secret is hard-coded in the tool.
-// Lookup order: $KHEEZ_CONFIG (path) -> ./kheez.config.json (gitignored) -> defaults below.
-// The test password is read from $KHEEZ_TEST_PASSWORD (preferred) or config.password.
+// Lookup order: $FIGMA_LIFT_CONFIG (path) -> ./figma-lift.config.json (gitignored) -> defaults below.
+// The test password is read from $FIGMA_LIFT_TEST_PASSWORD (preferred) or config.password.
 import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -19,10 +19,10 @@ const DEFAULTS = {
 };
 
 export function loadConfig() {
-  const file = process.env.KHEEZ_CONFIG || path.join(here, 'kheez.config.json');
+  const file = process.env.FIGMA_LIFT_CONFIG || path.join(here, 'figma-lift.config.json');
   let user = {};
   if (fs.existsSync(file)) user = JSON.parse(fs.readFileSync(file, 'utf8'));
   const cfg = { ...DEFAULTS, ...user, login: { ...DEFAULTS.login, ...(user.login || {}) } };
-  cfg.password = process.env.KHEEZ_TEST_PASSWORD || user.password || '';
+  cfg.password = process.env.FIGMA_LIFT_TEST_PASSWORD || user.password || '';
   return cfg;
 }
