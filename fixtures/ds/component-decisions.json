@@ -1,0 +1,31 @@
+{
+ "$schema": "../../docs/ds-schema/decisions.schema.json",
+ "version": 1,
+ "decisions": [
+  {
+   "id": "cmp_card_b12b",
+   "action": "accept",
+   "note": "Looks right; promote from review to auto."
+  },
+  {
+   "id": "cmp_list-item_151e",
+   "action": "rename",
+   "name": "Lists/Settings Row",
+   "group": "Lists"
+  },
+  {
+   "sig": "sig-of-a-rejected-cluster",
+   "action": "reject",
+   "note": "Dialog panel is a one-off."
+  },
+  {
+   "id": "cmp_button_8ff3",
+   "action": "split",
+   "by": "size",
+   "note": "Example only: split Button clusters by size."
+  }
+ ],
+ "exclude": [
+  "*/Dialog/*"
+ ]
+}

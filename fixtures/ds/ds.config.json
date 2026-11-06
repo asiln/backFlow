@@ -1,0 +1,90 @@
+{
+ "$schema": "../../docs/ds-schema/config.schema.json",
+ "tailwind": "./tailwind.config.cjs",
+ "thresholds": {
+  "occ": 3,
+  "occTiny": 4,
+  "tinyNodes": 6,
+  "screens": 2,
+  "minConf": 55,
+  "colorDeltaE": 1.5,
+  "alphaTol": 0.02,
+  "minUses": 3,
+  "minScreens": 2
+ },
+ "tokenMap": {
+  "page": {
+   "fill": "bg/page"
+  },
+  "surface": {
+   "fill": "bg/surface"
+  },
+  "line": {
+   "stroke": "border/default"
+  },
+  "ink": {
+   "text": "text/primary",
+   "icon": "icon/primary"
+  },
+  "dim": {
+   "text": "text/dim",
+   "icon": "icon/dim"
+  },
+  "accent": {
+   "fill": "bg/accent",
+   "icon": "icon/accent"
+  },
+  "white": {
+   "text": "text/on-accent",
+   "icon": "icon/on-accent"
+  },
+  "black": {
+   "fill": "bg/scrim",
+   "shadow": "effect/shadow"
+  }
+ },
+ "textStyleNames": {
+  "t:Inter/14/400/20/0": "Text/Body 14 Regular",
+  "t:Inter/14/500/20/0": "Text/Label 14 Medium",
+  "t:Inter/16/600/24/0": "Text/Card Title 16 Semibold",
+  "t:Inter/24/700/32/0": "Text/Heading 24 Bold",
+  "t:Inter/12/500/16/0": "Text/Caption 12 Medium"
+ },
+ "nameHints": {
+  "roles": {
+   "button": "Button",
+   "item": "List Item",
+   "article": "Card",
+   "dialog": "Dialog",
+   "header": "Page Header"
+  },
+  "shapes": [
+   {
+    "match": {
+     "h": 64,
+     "fixedBottom": true
+    },
+    "name": "Bottom Nav"
+   }
+  ],
+  "groups": {
+   "Button": "Buttons",
+   "Card": "Cards",
+   "List Item": "Lists"
+  }
+ },
+ "variantNames": {
+  "fill": {
+   "accent": "Primary",
+   "muted": "Secondary"
+  }
+ },
+ "fontMap": {
+  "Inter": "Inter"
+ },
+ "dsMode": "report",
+ "exclude": [
+  "*/Dialog/*"
+ ],
+ "scope": "components"
+}

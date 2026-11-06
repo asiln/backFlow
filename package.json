@@ -10,7 +10,9 @@
   "keywords": ["figma", "figma-plugin", "html-to-figma", "auto-layout", "design-tokens", "playwright"],
   "engines": { "node": ">=18" },
   "scripts": {
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "validate:ds": "node scripts/validate-ds.mjs",
+    "test": "node scripts/run-tests.mjs"
   },
   "dependencies": { "playwright-core": "^1.49.0" }
 }

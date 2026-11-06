@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/config.schema.json",
+  "title": "Figma Lift: ds.config.json (spec 7.4)",
+  "description": "Project-specific settings. No colour, name or font literal lives in code; it lives here or in the Tailwind config. Unknown keys are rejected unless they start with 'x-' (free for extensions).",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": { "^x-": {} },
+  "properties": {
+    "$schema": { "type": "string" },
+    "tailwind": { "type": "string", "description": "path to a CommonJS tailwind config (relative to this file)" },
+    "thresholds": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "occ": { "type": "integer", "minimum": 1, "description": "min occurrences (spec 1.5, default 3)" },
+        "occTiny": { "type": "integer", "minimum": 1, "description": "min occurrences when nodes < tinyNodes (default 4)" },
+        "tinyNodes": { "type": "integer", "minimum": 1, "description": "default 6" },
+        "screens": { "type": "integer", "minimum": 1 },
+        "minConf": { "type": "number", "minimum": 0, "maximum": 100 },
+        "colorDeltaE": { "type": "number", "minimum": 0 },
+        "alphaTol": { "type": "number", "minimum": 0 },
+        "minUses": { "type": "integer", "minimum": 1, "description": "tokens: min uses (default 3)" },
+        "minScreens": { "type": "integer", "minimum": 1, "description": "tokens: min screens (default 2)" }
+      }
+    },
+    "tokenMap": {
+      "type": "object",
+      "description": "Tailwind colour name -> semantic variable name per role. Alpha variants append '-<aa>' to the mapped name.",
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "properties": { "fill": { "type": "string" }, "text": { "type": "string" }, "icon": { "type": "string" }, "stroke": { "type": "string" }, "shadow": { "type": "string" } }
+      }
+    },
+    "textStyleNames": { "type": "object", "description": "text style key -> style name (the spec leaves the <Role> part of 'Text/<Role> <size> <Weight>' undefined)", "additionalProperties": { "type": "string" } },
+    "nameHints": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "roles": { "type": "object", "additionalProperties": { "type": "string" } },
+        "shapes": { "type": "array", "items": { "type": "object", "required": ["match", "name"], "properties": { "match": { "type": "object" }, "name": { "type": "string" } }, "additionalProperties": false } },
+        "groups": { "type": "object", "description": "component name -> group (default groups come from the role table)", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "variantNames": { "type": "object", "description": "dictionary per slot field, e.g. fill: { accent: Primary }", "additionalProperties": { "type": "object", "additionalProperties": { "type": "string" } } },
+    "fontMap": { "type": "object", "additionalProperties": { "type": "string" } },
+    "dsMode": { "enum": ["report", "prefer-ds", "prefer-own"] },
+    "exclude": { "type": "array", "items": { "type": "string" } },
+    "scope": { "enum": ["components", "all"] }
+  }
+}

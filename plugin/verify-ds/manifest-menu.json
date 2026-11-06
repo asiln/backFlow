@@ -1,0 +1,14 @@
+{
+  "name": "Figma Lift DS Verify (menu probe)",
+  "id": "figma-lift-verify-ds-menu-1",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] },
+  "menu": [
+    { "name": "Run all experiments", "command": "run" },
+    { "name": "Probe figma.command only (E19)", "command": "probe" }
+  ]
+}

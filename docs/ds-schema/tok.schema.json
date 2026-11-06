@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/tok.schema.json",
+  "title": "Figma Lift: TokRef (spec 7.1)",
+  "description": "The `tok` field of any screen/library node. Keys refer to entries of tokens.json. A key is only written when its token status is bound, create or review (never for skip/off-scale values, those stay literal). Padding keys are computed after subtracting ls.bw.",
+  "$defs": {
+    "ColourKey": { "type": "string", "pattern": "^c:[0-9a-f]{6}@[0-9]{1,3}$", "description": "c:rrggbb@aa, aa = alpha*100 (integer)" },
+    "TextStyleKey": { "type": "string", "pattern": "^t:.+/[0-9.]+/[0-9]+/[0-9.]+/-?[0-9.]+$", "description": "t:family/size/weight/lh/ls_em" },
+    "RadiusKey": { "type": "string", "pattern": "^r:[0-9.]+(/[0-9.]+){0,3}$", "description": "r:16 or r:tl/tr/br/bl" },
+    "SpacingKey": { "type": "string", "pattern": "^sp:[0-9.]+$" },
+    "SizeKey": { "type": "string", "pattern": "^sz:h[0-9.]+$" },
+    "EffectKey": { "type": "string", "pattern": "^e:i?-?[0-9.]+,-?[0-9.]+,[0-9.]+,-?[0-9.]+,[0-9a-f]{6}@[0-9]{1,3}(\\|i?-?[0-9.]+,-?[0-9.]+,[0-9.]+,-?[0-9.]+,[0-9a-f]{6}@[0-9]{1,3})*$", "description": "e:[i]x,y,blur,spread,rrggbb@aa joined by | for stacks" },
+    "TokRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "f": { "$ref": "#/$defs/ColourKey", "description": "fill colour (role fill)" },
+        "s": { "$ref": "#/$defs/ColourKey", "description": "stroke colour (role stroke)" },
+        "tx": { "$ref": "#/$defs/ColourKey", "description": "text colour (role text)" },
+        "ic": { "$ref": "#/$defs/ColourKey", "description": "icon (svg root) colour (role icon). Added to the spec, see CONTRACT-NOTES" },
+        "ts": { "$ref": "#/$defs/TextStyleKey" },
+        "r": { "$ref": "#/$defs/RadiusKey" },
+        "g": { "$ref": "#/$defs/SpacingKey" },
+        "g2": { "$ref": "#/$defs/SpacingKey" },
+        "p": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "oneOf": [{ "$ref": "#/$defs/SpacingKey" }, { "type": "null" }] }, "description": "[top,right,bottom,left]; null = zero or untokenised" },
+        "e": { "$ref": "#/$defs/EffectKey" },
+        "sw": { "type": "string", "description": "stroke weight key (no harvest family is defined in the spec; reserved)" },
+        "gr": { "type": "array", "items": { "type": "object", "required": ["i", "key"], "properties": { "i": { "type": "integer", "minimum": 0 }, "key": { "type": "string" } }, "additionalProperties": false } }
+      }
+    }
+  },
+  "$ref": "#/$defs/TokRef"
+}
