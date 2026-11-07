@@ -16,7 +16,8 @@ Turn a running web app into **real Figma auto-layout**: editable text, vector ic
 2. `extract.mjs` logs in (local test accounts only), opens each screen in a batch, runs the walker, writes `out/<batch>.figma.json`, and reports problems (404, redirect to login, `???`, error toasts, spinners, empty screens).
 3. `plugin/` is a Figma plugin. Paste the JSON (or pick the file) and it builds one named Section with all screens in a grid.
 4. `run-all.mjs` runs a whole directory of batches and writes a combined `summary.json`.
-5. `diff.mjs` compares a real screenshot against an HTML re-render built only from the JSON, to catch systematic extraction errors.
+5. `pipeline.mjs` runs a manifest of batches with setup and cleanup commands around each one (see Pipeline).
+6. `diff.mjs` compares a real screenshot against an HTML re-render built only from the JSON, to catch systematic extraction errors.
 
 ## Run
 
@@ -66,6 +67,58 @@ Each report entry has `warnings` (strings) and `broken` (true if any starts with
 
 - ERROR: HTTP status >= 400, navigation failure, 404 page, app error screen, redirect to login/register/otp when the path was not an auth page, `???` in text, 3+ skeleton placeholders, error toast (text with خطا/ناموفق/مشکل/error/failed), empty screen (fewer than 8 nodes or no text; for `selector` captures only "nothing matched").
 - warn: spinner-like elements, loading text, other toasts, 1-2 skeleton elements, images that became placeholders, uncaught page errors.
+
+## Pipeline (one command for many batches)
+
+`run-all.mjs` runs every batch in a folder and nothing else. When the batches need app state prepared first (reset a test account, switch a setting, start a session) and cleaned up afterwards, describe the whole sequence in `<batches dir>/_pipeline.json` and run it with one command:
+
+```
+node pipeline.mjs batches/app                       # everything -> out/final/app/
+node pipeline.mjs batches/app --dry-run             # print the plan and check the batch files, run nothing
+node pipeline.mjs batches/app --only checkout       # one step (exact name wins, else substring)
+node pipeline.mjs batches/app --from checkout       # this step and all after it
+node pipeline.mjs batches/app --out some/dir        # output root (default out/final)
+```
+
+`run-all.mjs` is unchanged. The manifest:
+
+```json
+{
+  "preflight": ["curl -sf http://localhost:3000 > /dev/null", "test -n \"$FIGMA_LIFT_TEST_PASSWORD\""],
+  "steps": [
+    { "batch": "home.json" },
+    { "batch": "signup-flow.json", "before": ["psql -f reset.sql"], "after": ["psql -f restore.sql"], "retries": 1, "deleteState": ["phone"] },
+    { "batch": "../public/landing.json", "onlyIfMissing": true }
+  ],
+  "finally": ["psql -f restore.sql"]
+}
+```
+
+- `preflight`: shell commands that must all exit 0. If one fails no step runs (`finally` still does).
+- `steps`: run in order, one extraction at a time, in its own child process (so a stuck page can be killed by `stepTimeoutMin`, default 45). `batch` is relative to the batches dir.
+  - `before` / `after`: shell commands around the extraction. A failing `before` skips the extraction; `after` always runs, so a failed attempt still restores what `before` changed.
+  - `retries`: extra attempts for the whole step (before, extract, after). Used when the extraction throws, times out, or captures fewer screens than the batch lists, for example after `Execution context was destroyed` (the report notes `contextDestroyed`).
+  - `deleteState`: saved sessions to delete after the step (even when it failed). `"phone"` stands for the batch's own `phone`; any other string is used as the id in `state-<id>.json`. Use it for one-shot batches and whenever a hook logs the same account in through the API.
+  - `onlyIfMissing`: skip when a complete output (frames at least the screen count) already exists.
+- `finally`: always runs, every command, failures are recorded.
+- `commandTimeoutSec` (default 180) limits each shell command.
+
+Every step is fail-soft: an error is recorded and the next step runs. An output with fewer frames than the batch has screens is refused: the step is marked failed and any earlier good output is kept (flagged as previous output in the summary).
+
+Shell commands run through `sh -c` (Git Bash on Windows, or `$PIPELINE_SHELL`) with the tool folder as cwd, `MSYS_NO_PATHCONV=1`, and these variables: `PIPELINE_TOOL_DIR`, `PIPELINE_BATCH_DIR`, `PIPELINE_OUT_DIR`, and per step `PIPELINE_STEP`, `PIPELINE_PHONE`. Never print secrets from a hook; the pipeline logs the command text and the last lines of failing output.
+
+Output, per batch directory name (the folder that holds the batch file, so a step with `../public/landing.json` writes to `out/final/public/`):
+
+| File | Content |
+|---|---|
+| `out/final/<dir>/<batch>.figma.json` | the import file |
+| `out/final/<dir>/reports/<batch>.report.json` | the per-screen report |
+| `out/final/<manifest dir>/summary.json` | all steps: status, screens expected vs captured, size, F0 average and minimum, broken and warned screens, attempts, errors |
+| `out/final/<manifest dir>/SUMMARY.md` | the same as a table, plus failed steps, screens below 90% F0 and flagged screens |
+
+Running with `--only` or `--from` keeps the other rows of the previous summary (marked as from an earlier run). Exit code 0 means all good, 1 means a step, preflight or finally command failed, 2 means everything ran but some screens look broken. Ctrl+C stops the current extraction and still runs `finally`.
+
+`extract.mjs` also accepts `--report <file>` to write the per-screen report as JSON. The manifest logic is covered by `tools/pipeline.test.mjs` (fake extractor and fake shell, no browser): `npm test`.
 
 ## Install the plugin once (Figma desktop app)
 
@@ -133,6 +186,23 @@ Options and flags:
 - `node plugin-mock.mjs file.figma.json [--text-scale=1.05] [--no-grid] [--no-layout]` runs the plugin against a mock with its own layout engine, reports violations of documented API rules (FILL outside auto-layout, HUG on a rectangle, text FILL with WIDTH_AND_HEIGHT, resize after layoutSizing ...) and a position-fidelity percentage. It is not Figma.
 
 Known limits: BASELINE alignment is approximated by geometry (and may need an `align` wrapper), `position:fixed` children stay inside their DOM parent instead of being hoisted to the screen, grid subgrid/dense/auto-fill layouts only work when the computed tracks are plain pixels, negative margins fall to F2/F3, RTL wrap rows start on the left in Figma, aspect ratio is not locked, percent/viewport sizes are frozen at the captured width (each width is its own frame).
+
+## Components and design system
+
+Two more commands turn the exported screens into a reusable library inside the same Figma file:
+
+```
+node tokens.mjs --in "out/final/**/*.figma.json" --out out/enriched --report       # colours, text styles, radii, spacing -> tokens.json
+node componentize.mjs --in "out/final/**/*.figma.json" --out out/enriched --report  # repeated structures -> _library.json, cmp/tok on every screen
+```
+
+Then, in Figma (development plugins, everything in one file):
+
+1. **Figma Lift Tokens** (`plugin-tokens/`): paste `tokens.json`, dry run, apply. Creates variables and text styles, never duplicates. See [docs/PLUGIN-TOKENS.md](docs/PLUGIN-TOKENS.md).
+2. **Figma Lift Components** (`plugin-components/`): paste `_library.json`, dry run, apply. Builds components, variant sets and icon sets. See [docs/PLUGIN-COMPONENTS.md](docs/PLUGIN-COMPONENTS.md).
+3. **Figma Lift Import** with "Use components" and "Bind tokens": screens become instances of the masters with variables bound. See [docs/PLUGIN-IMPORT.md](docs/PLUGIN-IMPORT.md).
+
+Everything degrades gracefully: a missing master or a failed override gives a plain frame, never an aborted import. Design and measured Figma behaviour: [spec](docs/COMPONENTS-AND-DESIGN-SYSTEM-SPEC.md), [results](docs/VERIFY-DS-RESULTS.md).
 
 ## Notes and known limits
 
