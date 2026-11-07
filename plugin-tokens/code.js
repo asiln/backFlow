@@ -433,7 +433,7 @@ function effectDiff(style, stack) {
     const f = fx[i], type = e.inset ? 'INNER_SHADOW' : 'DROP_SHADOW';
     const c = parseHex('#' + e.hex, e.a);
     if (f.type !== type) d.push('#' + i + ' type ' + f.type + ' vs ' + type);
-    else if (!f.offset || Math.abs(f.offset.x - e.x) > 0.01 || Math.abs(f.offset.y - e.y) > 0.01 || Math.abs(f.radius - e.blur) > 0.01 || Math.abs((f.spread || 0) - e.spread) > 0.01) d.push('#' + i + ' geometry differs');
+    else if (!f.offset || Math.abs(f.offset.x - e.x) > 0.01 || Math.abs(f.offset.y - e.y) > 0.01 || Math.abs(f.radius - e.blur) > 0.01 || Math.abs((f.spread || 0) - e.spread) > 0.01) d.push('#' + i + ' geometry differs (file x' + (f.offset ? f.offset.x : '?') + ' y' + (f.offset ? f.offset.y : '?') + ' blur' + f.radius + ' spread' + (f.spread || 0) + ' vs token x' + e.x + ' y' + e.y + ' blur' + e.blur + ' spread' + e.spread + ')');
     else if (f.color && !colorsClose(f.color, c)) d.push('#' + i + ' colour ' + fmtColor(f.color) + ' vs ' + fmtColor(c));
   });
   return d;
