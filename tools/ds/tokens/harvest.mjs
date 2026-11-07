@@ -315,7 +315,7 @@ export function createHarvester(rawConfig = {}) {
 
     // ---- effects
     const effects = accs.filter((a) => a.family === 'e').sort(byCount).map((u) => {
-      const e = { key: u.key, count: u.count, screens: u.screens.size, status: (() => { const h = Number(u.key.slice(4)); return Number.isFinite(h) && (Math.abs(h * 2 - Math.round(h * 2)) > 0.01 || h > 120) ? 'skip' : thresholdStatus({ count: u.count, screens: u.screens.size }); })() };
+      const e = { key: u.key, count: u.count, screens: u.screens.size, status: thresholdStatus({ count: u.count, screens: u.screens.size }) };
       const twS = tw ? tw.shadows.find((s) => s.key === u.key) : null;
       if (twS) e.tailwind = `shadow${twS.name === 'DEFAULT' ? '' : '-' + twS.name}`;
       const ex = inv.effectStyles.find((s) => keyOfEffects(s.effects) === u.key);
@@ -342,7 +342,9 @@ export function createHarvester(rawConfig = {}) {
     {
       let first = true;
       for (const u of accs.filter((a) => a.family === 'sz').sort(byCount)) {
-        const e = { key: u.key, count: u.count, screens: u.screens.size, status: thresholdStatus({ count: u.count, screens: u.screens.size }) };
+        const h = Number(u.key.slice(4));
+        const clean = Number.isFinite(h) && Math.abs(h * 2 - Math.round(h * 2)) < 0.01 && h <= 120; // fractional or huge heights are layout results, not tokens
+        const e = { key: u.key, count: u.count, screens: u.screens.size, status: clean ? thresholdStatus({ count: u.count, screens: u.screens.size }) : 'skip' };
         if (e.status === 'create') {
           const name = cfg.sizeNames[u.key] || (first ? 'size/control' : `size/control-${u.key.slice(4).replace(/\./g, '_')}`);
           first = false;
