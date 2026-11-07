@@ -276,7 +276,7 @@ export function createHarvester(rawConfig = {}) {
         let nameTw = null;
         if (table && Number.isFinite(px)) for (const [k, v] of Object.entries(table)) if (Math.abs(v - px) < 1e-6) { nameTw = k; break; }
         if (nameTw != null) e.tailwind = classOf(nameTw);
-        const mk = (name) => ({ collection, name, type: 'FLOAT', scopes });
+        const mk = (name) => ({ collection, name: String(name).replace(/\./g, '_'), type: 'FLOAT', scopes }); // Figma rejects '.' in variable names
         let named = nameTw != null ? inv.varByName.get(`${collection}|${nameOf(nameTw)}`) : null;
         if (named && named.type !== 'FLOAT') named = null;
         if (named) { e.target = mk(nameOf(nameTw)); e.existing = { id: named.id, name: `${collection}/${named.name}` }; e.status = 'bound'; }
@@ -289,7 +289,7 @@ export function createHarvester(rawConfig = {}) {
             e.target = mk(nameTw != null ? nameOf(nameTw) : nameOf(String(px))); e.existing = null; e.status = 'review';
             e.candidates = cands.map((c) => ({ id: c.id, name: `${(inv.collById.get(c.collection) || { name: collection }).name}/${c.name}` }));
           } else if (nameTw != null) { e.target = mk(nameOf(nameTw)); e.existing = null; e.status = thresholdStatus(e); }
-          else if (!table) { e.target = mk(nameOf(String(px))); e.existing = null; e.status = Number.isFinite(px) ? thresholdStatus(e) : (meetsThresholds(e) ? 'off-scale' : 'skip'); }
+          else if (!table) { e.target = mk(nameOf(String(px))); e.existing = null; e.status = Number.isFinite(px) ? (Math.abs(px * 2 - Math.round(px * 2)) < 0.01 && px <= 256 ? thresholdStatus(e) : 'skip') /* fractional rounding noise is not a token */ : (meetsThresholds(e) ? 'off-scale' : 'skip'); }
           else {
             e.status = meetsThresholds(e) ? 'off-scale' : 'skip';
             if (e.status === 'off-scale' && Number.isFinite(px)) {
@@ -315,7 +315,7 @@ export function createHarvester(rawConfig = {}) {
 
     // ---- effects
     const effects = accs.filter((a) => a.family === 'e').sort(byCount).map((u) => {
-      const e = { key: u.key, count: u.count, screens: u.screens.size, status: thresholdStatus({ count: u.count, screens: u.screens.size }) };
+      const e = { key: u.key, count: u.count, screens: u.screens.size, status: (() => { const h = Number(u.key.slice(4)); return Number.isFinite(h) && (Math.abs(h * 2 - Math.round(h * 2)) > 0.01 || h > 120) ? 'skip' : thresholdStatus({ count: u.count, screens: u.screens.size }); })() };
       const twS = tw ? tw.shadows.find((s) => s.key === u.key) : null;
       if (twS) e.tailwind = `shadow${twS.name === 'DEFAULT' ? '' : '-' + twS.name}`;
       const ex = inv.effectStyles.find((s) => keyOfEffects(s.effects) === u.key);
@@ -344,7 +344,7 @@ export function createHarvester(rawConfig = {}) {
       for (const u of accs.filter((a) => a.family === 'sz').sort(byCount)) {
         const e = { key: u.key, count: u.count, screens: u.screens.size, status: thresholdStatus({ count: u.count, screens: u.screens.size }) };
         if (e.status === 'create') {
-          const name = cfg.sizeNames[u.key] || (first ? 'size/control' : `size/control-${u.key.slice(4)}`);
+          const name = cfg.sizeNames[u.key] || (first ? 'size/control' : `size/control-${u.key.slice(4).replace(/\./g, '_')}`);
           first = false;
           e.target = { collection: cfg.collections.layout, name: uniqueName('sz', name, u.key), type: 'FLOAT', scopes: ['WIDTH_HEIGHT'] };
         }

@@ -204,14 +204,14 @@ function desired(family, t) { // -> { type, value } or { skip: reason }
   return m ? { type: 'FLOAT', value: parseFloat(m[1]) } : { skip: 'unsupported key' };
 }
 function scopesFor(family, t) {
-  const tg = t.target || {};
+  const tg = cleanTarget(t.target);
   let s = tg.scopes && tg.scopes.length ? tg.scopes.slice() : (family === 'color' ? (tg.collection === PRIMITIVES_COLLECTION ? [] : ROLE_SCOPES[t.role] || ['ALL_SCOPES']) : FAMILY_SCOPES[family] || ['ALL_SCOPES']);
   const bad = s.filter((x) => SCOPES.indexOf(x) < 0);
   s = s.filter((x) => SCOPES.indexOf(x) >= 0);
   return { scopes: s, bad: bad };
 }
 function webSyntax(family, t) {
-  const tg = t.target || {};
+  const tg = cleanTarget(t.target);
   if (tg.codeSyntax && tg.codeSyntax.WEB) return tg.codeSyntax.WEB;
   const tw = t.tailwind;
   if (!tw) return null;
@@ -225,9 +225,11 @@ function sameVar(type, a, b) {
   if (type === 'COLOR') return a && b && typeof a === 'object' && colorsClose(a, b);
   return Math.abs(a - b) < 0.001;
 }
+// Figma variable names cannot contain '.'; tokens.json from older runs may still have them
+const cleanTarget = (t) => { const o = t || {}; return o.name && /\./.test(o.name) && o.type ? Object.assign({}, o, { name: o.name.replace(/\./g, '_') }) : o; };
 const fmtVal = (type, v) => (v === undefined ? '(alias unresolved)' : type === 'COLOR' ? fmtColor(v) : String(v));
 function findVar(t) {
-  const tg = t.target || {};
+  const tg = cleanTarget(t.target);
   const role = t.role || '';
   let v = t.existing && t.existing.id ? IDX.varById.get(t.existing.id) : null;
   if (v) return { v: v, how: 'id' };
@@ -253,7 +255,7 @@ async function ensureCollection(name, t) {
   return c;
 }
 function findPrimitive(t, want) {
-  const tg = t.target || {};
+  const tg = cleanTarget(t.target);
   if (tg.alias) { // explicit alias from the token map: "Primitives/gray/900" or "gray/900"
     const nm = tg.alias.indexOf(PRIMITIVES_COLLECTION + '/') === 0 ? tg.alias.slice(PRIMITIVES_COLLECTION.length + 1) : tg.alias;
     const hit = IDX.prims.filter((p) => p.name === nm)[0];
@@ -266,7 +268,7 @@ function findPrimitive(t, want) {
   return {};
 }
 async function handleVariable(family, t) {
-  const tg = t.target || {};
+  const tg = cleanTarget(t.target);
   if (t.status === 'skip' || t.status === 'off-scale') {
     add(family, t, tg.name, 'skipped', t.status === 'off-scale' ? 'off-scale' + (t.nearest ? ' (nearest ' + t.nearest + ')' : '') : 'below thresholds, stays literal');
     return;
