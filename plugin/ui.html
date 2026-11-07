@@ -21,6 +21,12 @@
 <input type="text" id="sec" placeholder="defaults to the batch name">
 <label class="chk"><input type="checkbox" id="bind"> Bind colours to local variables</label>
 <label class="chk"><input type="checkbox" id="auto" checked> Auto layout (when the JSON has it)</label>
+<label class="chk"><input type="checkbox" id="cmp"> Use components (instances of the masters in this file)</label>
+<label class="chk"><input type="checkbox" id="tok"> Bind tokens (variables and styles by key)</label>
+<label>Optional: _library.json (slot tables if the masters carry none)</label>
+<input type="file" id="lib" accept=".json,application/json">
+<label>Optional: tokens.json (name fallback)</label>
+<input type="file" id="tokf" accept=".json,application/json">
 <button id="go">Build layers</button> <button id="cancel" class="sec" disabled>Cancel</button>
 <progress id="bar" value="0" max="1" hidden></progress>
 <div id="prog"></div>
@@ -31,12 +37,20 @@ $('f').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   $('t').value = await f.text(); log('Loaded ' + f.name + ' (' + Math.round(f.size / 1024) + ' KB)');
   try { const d = JSON.parse($('t').value); if (d.name && !$('sec').value) $('sec').value = d.name; } catch (e) {}
+  detect();
 };
+let LIB = null, TOKF = null;
+const readJson = async (e, set, what) => { const f = e.target.files[0]; if (!f) { set(null); return; } try { set(JSON.parse(await f.text())); log('Loaded ' + what + ' ' + f.name); } catch (er) { set(null); log('Invalid ' + what + ': ' + er.message); } };
+$('lib').onchange = (e) => readJson(e, (v) => { LIB = v; }, 'library');
+$('tokf').onchange = (e) => readJson(e, (v) => { TOKF = v; }, 'tokens');
+// the two design-system options default to on when the JSON carries cmp / tok fields
+function detect() { const t = $('t').value; $('cmp').checked = t.includes('"cmp":'); $('tok').checked = t.includes('"tok":'); }
+$('t').onchange = detect;
 $('go').onclick = () => {
   let data; try { data = JSON.parse($('t').value); } catch (e) { log('Invalid JSON: ' + e.message); return; }
   if (!data.frames) { log('Not an extractor file (no "frames").'); return; }
   $('log').textContent = ''; $('go').disabled = true; $('cancel').disabled = false; $('bar').hidden = false;
-  parent.postMessage({ pluginMessage: { type: 'build', data, opts: { bindVars: $('bind').checked, autoLayout: $('auto').checked, sectionName: $('sec').value.trim() || null } } }, '*');
+  parent.postMessage({ pluginMessage: { type: 'build', data, opts: { bindVars: $('bind').checked, autoLayout: $('auto').checked, useComponents: $('cmp').checked, bindTokens: $('tok').checked, sectionName: $('sec').value.trim() || null }, lib: LIB, tokens: TOKF } }, '*');
 };
 $('cancel').onclick = () => parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
 onmessage = e => {
