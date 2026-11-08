@@ -109,7 +109,7 @@ async function runPlugin(figma, mode, lib, opts) {
   const sum = figma._msgs.find((m) => m.summary); const rep = figma._msgs.find((m) => m.report);
   return { summary: sum && sum.summary, report: rep && rep.report, logs: figma._msgs.filter((m) => m.log).map((m) => m.log).join('\n') };
 }
-const liftPage = (f) => f.root.children.find((p) => p.name === 'Lift Components');
+const liftPage = (f) => f.root.children.find((p) => p.name === 'Backflow Components' || p.name === 'Lift Components');
 const allNodes = (n, out = []) => { for (const c of n.children) { out.push(c); allNodes(c, out); } return out; };
 const tagged = (f) => allNodes(liftPage(f)).filter((n) => n.getSharedPluginData('figmalift', 'cmp'));
 let pass = 0; const ok = (c, m) => { assert.ok(c, m); pass++; console.log('  ok  ' + m); };
@@ -134,7 +134,7 @@ if (process.env.FL_STRESS_LIB) {
   ok(f._stats.creates === before, 'dry run created no nodes');
   ok(!liftPage(f), 'dry run did not create the page');
   ok(/CREATE cmp_button_8ff3/.test(r.report) && /Icons: create 4/.test(r.report), 'dry report lists creates');
-  ok(/page "Lift Components" missing/.test(r.report), 'dry report says page would be created');
+  ok(/page "Backflow Components" missing/.test(r.report), 'dry report says page would be created');
 }
 {
   console.log('2. apply / idempotence');
@@ -163,6 +163,7 @@ if (process.env.FL_STRESS_LIB) {
   ok(allNodes(li).some((n) => n.type === 'INSTANCE' && n.mainComponent && n.mainComponent.name.startsWith('Icon/')), 'icons are instances of Icon/* components');
   const groups = liftPage(f).children.map((c) => c.name).sort().join(',');
   ok(groups === 'Buttons,Cards,Icons,Lists' && liftPage(f).children.every((c) => c.type === 'SECTION'), 'one Section per group: ' + groups);
+  { const gs = liftPage(f).children.slice().sort((p, q) => p.y - q.y); ok(gs.every((g, i) => i === 0 || g.y >= gs[i - 1].y + gs[i - 1].height), 'group sections do not overlap'); }
   ok(f._viol.length === 0, 'no API violations recorded');
   const nodeCount = allNodes(liftPage(f)).length, creates = f._stats.creates;
 
@@ -192,7 +193,7 @@ if (process.env.FL_STRESS_LIB) {
   console.log('5. page-limit fallback');
   const f = makeFigma({ pageLimit: true }); load(f);
   const r = await runPlugin(f, 'apply', LIB);
-  const sec = f.currentPage.children.find((c) => c.type === 'SECTION' && c.name === 'Lift Components');
+  const sec = f.currentPage.children.find((c) => c.type === 'SECTION' && c.name === 'Backflow Components');
   ok(!!sec && /FALLBACK/.test(r.logs) && r.summary.created === 7, 'Section fallback used and reported, 7 created');
   ok(sec.children.every((c) => c.type === 'FRAME'), 'groups are frames inside the section (sections cannot nest)');
   const r2 = await runPlugin(f, 'apply', LIB);

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/node.schema.json",
-  "title": "Figma Lift: export node (loose base schema + cmp/tok)",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/node.schema.json",
+  "title": "Backflow: export node (loose base schema + cmp/tok)",
   "description": "Validates the fields every consumer relies on and the optional `cmp` / `tok` additions. Everything else is allowed (additionalProperties), so legacy exports without cmp/tok/ls and exports with future fields still pass. Child coordinates are relative to the parent.",
   "$defs": {
     "RGBA": {

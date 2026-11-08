@@ -16,7 +16,7 @@ What they're doing when they use it: running a local or staging copy of their ap
 
 ## Product Purpose
 
-Figma Lift turns a running web app into real Figma auto-layout: editable text, vector icons, images, gradients and shadows. Sizing (Hug, Fill, Fixed) is inferred from how the page actually renders. Further steps harvest design tokens and repeated components, so screens import as instances of masters with variables bound.
+Backflow turns a running web app into real Figma auto-layout: editable text, vector icons, images, gradients and shadows. Sizing (Hug, Fill, Fixed) is inferred from how the page actually renders. Further steps harvest design tokens and repeated components, so screens import as instances of masters with variables bound.
 
 Success means the imported file is something a designer can keep working in. The layout holds when content changes, colours and type are tokens, repeated UI is components, and every place where fidelity was lost is reported, never hidden.
 
@@ -31,15 +31,15 @@ All four of these together are the claim. Future work keeps all of them:
 
 ## Operating Context
 
-- Terminal: `extract.mjs`, `run-all.mjs`, `pipeline.mjs` (a manifest with preflight, before/after and finally hooks), `diff.mjs` (pixel fidelity check), `tokens.mjs`, `componentize.mjs`, and `plugin-mock.mjs` (the plugin run against a mocked Figma API).
-- Figma desktop, development plugins: **Figma Lift Import** (`plugin/`), **Figma Lift Tokens** (`plugin-tokens/`), **Figma Lift Components** (`plugin-components/`), plus verification plugins (`plugin/verify/`, `plugin/verify-ds/`).
+- Terminal: the `backflow` CLI (`bin/backflow.mjs`, npm `@backflow/cli`) wrapping `extract.mjs`, `run-all.mjs`, `pipeline.mjs` (a manifest with preflight, before/after and finally hooks), `diff.mjs` (pixel fidelity check), `tokens.mjs`, `componentize.mjs`, and `plugin-mock.mjs` (the plugin run against a mocked Figma API).
+- Figma desktop, development plugins: **Backflow** (`plugin-lift/`, the merged plugin), and the single-purpose **Backflow Import** (`plugin/`), **Backflow Tokens** (`plugin-tokens/`), **Backflow Components** (`plugin-components/`), plus verification plugins (`plugin/verify/`, `plugin/verify-ds/`).
 - The intended order in Figma: Tokens (dry run, then apply), Components (dry run, then apply), Import with "Use components" and "Bind tokens".
 - Artifacts: batch JSON files, `out/<batch>.figma.json`, per-screen reports with warnings, `summary.json` / `SUMMARY.md`, `tokens.json`, `_library.json`.
 
 ## Capabilities and Constraints
 
 - The extractor refuses non-localhost origins. Don't weaken this.
-- Only test accounts are used. The password comes from `$FIGMA_LIFT_TEST_PASSWORD`, never a batch file. Exports can contain real app content, so `out/`, `batches/`, `state-*.json` and the config stay gitignored.
+- Only test accounts are used. The password comes from `$BACKFLOW_TEST_PASSWORD` (pre-1.0 `$FIGMA_LIFT_TEST_PASSWORD` still read), never a batch file. Exports can contain real app content, so `out/`, `batches/`, `state-*.json` and the config stay gitignored.
 - New JSON fields are optional and older exports must still import (backward compatibility is a rule).
 - Everything degrades gracefully: a missing master, a failed override or an unreadable image gives a plain frame or a labelled placeholder, never an aborted import.
 - Persian text never goes through shell arguments. It lives in batch files.
@@ -49,9 +49,13 @@ All four of these together are the claim. Future work keeps all of them:
 
 ## Brand Commitments
 
-- Name: **Figma Lift**. Plugin names follow the pattern "Figma Lift Import / Tokens / Components".
+- Name: **Backflow** (formerly Figma Lift). Plugin names: "Backflow", and "Backflow Import / Tokens / Components" for the single-purpose plugins. npm: `@backflow/cli`, command `backflow`.
+- Identity: the As-Built drawing set (chosen by the user, 2026-11-08). Blueline light theme, cyanotype Blueprint dark theme, Archivo and JetBrains Mono, the one-stroke "b" mark. Source of truth: `brand/` and DESIGN.md.
+- The plugin window carries the full Backflow skin (user decision), not Figma's UI3 look.
+- Fully open source and community run: MIT, free for everyone, funded by sponsors. No paid tier, no account.
 - Voice (from README and docs): plain, precise and technical. Short declarative sentences, limits stated openly, no hype. Fidelity numbers and failure reasons are reported, not glossed over.
-- License: MIT. Repository: github.com/asiln/figma-lift.
+- Never use Figma's name as a prefix, or Figma's colours or marks, in Backflow's identity. Backflow is not affiliated with Figma, Inc.
+- License: MIT. Repository: github.com/asiln/backflow.
 
 ## Evidence on Hand
 

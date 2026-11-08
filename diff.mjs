@@ -4,12 +4,13 @@
 //   diffPct (whole screen), per-type diff (text/svg/img/frame), and the worst individual nodes.
 import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 import { runBatch } from './extract.mjs';
+import { workDir } from './config.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const flag = (n, d = null) => { const i = args.indexOf(n); if (i < 0) return d; const v = args[i + 1]; args.splice(i, 2); return v; };
 const screenSel = flag('--screen');
-const outDir = path.resolve(flag('--out', path.join(here, 'out', 'diff')));
+const outDir = path.resolve(flag('--out', path.join(workDir(), 'out', 'diff')));
 const threshold = Number(flag('--threshold', 24));
 const useLs = args.includes('--ls'); if (useLs) args.splice(args.indexOf('--ls'), 1);
 const batchFile = args[0];
@@ -212,8 +213,8 @@ async function onScreen({ page, ctx, tree, screen, base }) {
   const doc = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${faceCss}\nhtml,body{margin:0;padding:0;background:#fff}*{-webkit-font-smoothing:auto}</style><div style="position:relative;width:${tree.w}px;height:${tree.h}px;overflow:hidden;background:${tree.fill ? rgba(tree.fill) : '#fff'}">${body.replace(/^<div /, '<div ')}</div>`;
   const rp = await ctx.newPage();
   await rp.setViewportSize({ width: tree.w, height: Math.max(tree.h, 100) });
-  await rp.route(base + '/__figma_lift_render', (rt) => rt.fulfill({ contentType: 'text/html; charset=utf-8', body: doc }));
-  await rp.goto(base + '/__figma_lift_render', { waitUntil: 'load' });
+  await rp.route(base + '/__backflow_render', (rt) => rt.fulfill({ contentType: 'text/html; charset=utf-8', body: doc }));
+  await rp.goto(base + '/__backflow_render', { waitUntil: 'load' });
   await rp.evaluate(() => document.fonts.ready);
   await rp.waitForTimeout(500);
   const render = await rp.screenshot({ clip: { x: 0, y: 0, width: tree.w, height: tree.h } });

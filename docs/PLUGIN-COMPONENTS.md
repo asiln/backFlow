@@ -1,6 +1,6 @@
-# Figma Lift Components (plugin-components)
+# Backflow Components (plugin-components)
 
-Development plugin `Figma Lift Components` (id `figma-lift-components-1`, no network). It reads `_library.json` (`docs/ds-schema/library.schema.json`, written by `componentize.mjs`) and builds the **masters** in the open file: one `COMPONENT` per component, one `COMPONENT_SET` per component with variants, and one icon set per icon (`Icon/<name>`, one member per size). The import plugin then instantiates them (docs/PLUGIN-IMPORT.md).
+Development plugin `Backflow Components` (id `backflow-components-1`, no network). It reads `_library.json` (`docs/ds-schema/library.schema.json`, written by `componentize.mjs`) and builds the **masters** in the open file: one `COMPONENT` per component, one `COMPONENT_SET` per component with variants, and one icon set per icon (`Icon/<name>`, one member per size). The import plugin then instantiates them (docs/PLUGIN-IMPORT.md).
 
 ## Run it
 
@@ -12,7 +12,7 @@ Development plugin `Figma Lift Components` (id `figma-lift-components-1`, no net
 
 ## What it builds
 
-- Page `Lift Components` (a Section per group when the file is at the 3-page limit of the Starter plan; the page is reused if present).
+- Page `Backflow Components` (a page named `Lift Components` from a pre-1.0 run is reused) (a Section per group when the file is at the 3-page limit of the Starter plan; the page is reused if present).
 - Masters are built with the same code path as the import plugin, then promoted with `createComponentFromNode` (E1: layout is kept). Text slots become TEXT properties, optional parts BOOLEAN properties (hidden child leaves the flow, E6), icon slots INSTANCE_SWAP, nested components are instances with exposed properties (E7).
 - Variants: component properties are added **before** `combineAsVariants` (E5), members are named `Prop=Value, Prop2=Value2`, laid out on a grid after combining (E17). A missing combination is never requested; masters that would need a hole are built without it.
 - Every master gets `setSharedPluginData('figmalift', 'cmp', id)` and `('figmalift','slots', JSON)`. The description carries the confidence band (`[REVIEW]` for the review band) and the usage counts.

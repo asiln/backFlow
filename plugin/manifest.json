@@ -1,6 +1,6 @@
 {
-  "name": "Figma Lift Import",
-  "id": "figma-lift-import-1",
+  "name": "Backflow Import",
+  "id": "backflow-import-1",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",

@@ -18,8 +18,12 @@ for (const f of files) {
   const r = spawnSync(process.execPath, ['--check', f], { encoding: 'utf8' });
   if (r.status !== 0) { bad++; console.error('FAIL', f, '\n' + r.stderr); }
 }
-for (const f of ['plugin/manifest.json', 'plugin/verify/manifest.json', 'package.json', 'figma-lift.config.example.json', 'batches.example/example.json']) {
+for (const f of ['plugin/manifest.json', 'plugin/verify/manifest.json', 'plugin-lift/manifest.json', 'plugin-tokens/manifest.json', 'plugin-components/manifest.json', 'package.json', 'backflow.config.example.json', 'batches.example/example.json']) {
   try { JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { bad++; console.error('BAD JSON', f, e.message); }
+}
+{ // the merged plugin bundle must match its sources
+  const r = spawnSync(process.execPath, ['scripts/build-lift.mjs', '--check'], { encoding: 'utf8' });
+  if (r.status !== 0) { bad++; console.error(r.stderr || r.stdout); }
 }
 console.log(`${files.length} scripts checked, ${bad} problem(s)`);
 process.exit(bad ? 1 : 0);

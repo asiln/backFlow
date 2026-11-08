@@ -109,7 +109,7 @@ function showResult(r) {
     $('sum').innerHTML = '<b>Inventory exported' + (r.cancelled ? ' (cancelled, partial)' : '') + '</b>' + table(r.inventoryCounts) + (r.failures ? '<div class="s-failed">' + r.failures + ' item(s) failed: ' + (r.failureList || []).join(' | ') + '</div>' : '') +
       '<div class="hint">Save as ds-inventory.json next to tokens.mjs and pass it with --inventory.</div>';
   } else {
-    lastName = r.action === 'dry' ? 'figma-lift-dry-run-' + stamp + '.json' : 'figma-lift-apply-' + stamp + '.json';
+    lastName = r.action === 'dry' ? 'backflow-dry-run-' + stamp + '.json' : 'backflow-apply-' + stamp + '.json';
     var c = r.counts || {};
     $('sum').innerHTML = '<b>' + (r.action === 'dry' ? 'Dry run (nothing changed)' : 'Apply') + (r.cancelled ? ' CANCELLED, partial' : ' finished') + '</b>' + table(c) +
       (r.conflicts ? '<div class="s-conflict">' + r.conflicts + ' conflict(s): the file value was kept, see the list.</div>' : '') + (r.failures ? '<div class="s-failed">' + r.failures + ' failure(s).</div>' : '');

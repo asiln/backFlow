@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/config.schema.json",
-  "title": "Figma Lift: ds.config.json (spec 7.4)",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/config.schema.json",
+  "title": "Backflow: ds.config.json (spec 7.4)",
   "description": "Project-specific settings. No colour, name or font literal lives in code; it lives here or in the Tailwind config. Unknown keys are rejected unless they start with 'x-' (free for extensions).",
   "type": "object",
   "additionalProperties": false,

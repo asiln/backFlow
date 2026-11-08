@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/screen-file.schema.json",
-  "title": "Figma Lift: export file (*.figma.json), plain or enriched",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/screen-file.schema.json",
+  "title": "Backflow: export file (*.figma.json), plain or enriched",
   "description": "Top level of an export. `figmaLift: 1` is what extract.mjs writes today. An enriched file (out/enriched/<file>.figma.json) additionally has `ds` pointing at the library and tokens files.",
   "type": "object",
   "required": ["figmaLift", "frames"],

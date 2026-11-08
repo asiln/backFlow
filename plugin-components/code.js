@@ -1,4 +1,4 @@
-// Figma Lift Components: builds the master components, component sets and icon components of a _library.json.
+// Backflow Components: builds the master components, component sets and icon components of a _library.json.
 // Idempotent (registry = shared plugin data), never aborts on a single failure (ladder R0..R4, docs/PLUGIN-COMPONENTS.md).
 // Reuses the build logic of plugin/code.js (copied, not imported: Figma plugins have no module system).
 figma.showUI(__html__, { width: 420, height: 640 });
@@ -26,13 +26,14 @@ const CFG = {
   combineLayoutHelperNeeded: true,   // E17: variants stack after combine -> grid helper + resizeWithoutConstraints
   componentInSectionOk: true,        // E18
   descriptionPersists: true,         // E18: confidence tags live in the description
-  // layout of the Lift Components page
+  // layout of the Backflow Components page
   layoutPad: 48, layoutGap: 48, layoutRowMax: 1800, variantGap: 24, variantPad: 32,
   // auto-layout switches copied from plugin/code.js
   autoLayout: true, strokeInLayout: true, allowNegativeSpacing: false, wrap: true, grid: true, gridAppendChildAt: false, fillTextWorks: true,
 };
 const NS = 'figmalift';              // shared plugin data namespace (registry convention, docs/PLUGIN-COMPONENTS.md)
-const PAGE_NAME = 'Lift Components';
+const PAGE_NAME = 'Backflow Components';
+const LEGACY_PAGE_NAMES = ['Lift Components']; // files built before 1.0 keep their page and are reused
 const BUILD_VER = 'cmpplugin-1';     // part of 'sig': bump when the build algorithm changes in a way that must rebuild masters
 
 // ======================================================================================================================
@@ -629,7 +630,7 @@ async function makeIcon(ic, name, host) {
 
 // ---------- tags, description, supersede ----------
 function describe(def) {
-  const lines = [(def.band === 'review' ? '[REVIEW] ' : '') + 'Figma Lift ' + def.id + ' | confidence ' + def.conf + ' (' + def.band + ')'];
+  const lines = [(def.band === 'review' ? '[REVIEW] ' : '') + 'Backflow ' + def.id + ' | confidence ' + def.conf + ' (' + def.band + ')'];
   if (def.band === 'review') lines.push('Needs a designer check: name, variants and slots are heuristics.');
   if (def.stats) lines.push('Seen ' + def.stats.occ + 'x on ' + def.stats.screens + ' screens.');
   if (def.ds) lines.push('Possible design-system match: ' + def.ds.name + ' (score ' + def.ds.score + ', mode ' + def.ds.mode + ', not instantiated).');
@@ -652,13 +653,14 @@ function supersede(old) {
 // ---------- hosts (page or section fallback) and layout ----------
 async function getHost() {
   await figma.loadAllPagesAsync();
-  let page = figma.root.children.find((p) => p.type === 'PAGE' && p.name === PAGE_NAME) || null;
-  if (page) return { kind: 'page', page, host: page, note: 'page "' + PAGE_NAME + '" exists' };
+  let page = figma.root.children.find((p) => p.type === 'PAGE' && p.name === PAGE_NAME)
+    || figma.root.children.find((p) => p.type === 'PAGE' && LEGACY_PAGE_NAMES.includes(p.name)) || null;
+  if (page) return { kind: 'page', page, host: page, note: 'page "' + page.name + '" exists' };
   if (!APPLY) return { kind: 'missing', note: 'page "' + PAGE_NAME + '" missing: would be created (falls back to a Section on the current page when the plan limits pages)' };
   try { page = figma.createPage(); page.name = PAGE_NAME; return { kind: 'page', page, host: page, note: 'page "' + PAGE_NAME + '" created' }; }
   catch (e) {
     const cur = figma.currentPage;
-    let sec = cur.children.find((c) => c.type === 'SECTION' && c.name === PAGE_NAME);
+    let sec = cur.children.find((c) => c.type === 'SECTION' && (c.name === PAGE_NAME || LEGACY_PAGE_NAMES.includes(c.name)));
     if (!sec) { sec = figma.createSection(); sec.name = PAGE_NAME; let right = 0; for (const c of cur.children) if (c !== sec) right = Math.max(right, c.x + c.width); sec.x = right ? right + 200 : 0; sec.y = 0; cur.appendChild(sec); }
     return { kind: 'section', page: cur, host: sec, note: 'FALLBACK: could not create a page (' + (e && e.message ? e.message : e) + '); using Section "' + PAGE_NAME + '" on page "' + cur.name + '"' };
   }
@@ -808,6 +810,10 @@ async function run(msg) {
     for (const i of plan.items) { if (i.status === 'exists') continue; if (shown++ >= maxList) { lines.push('  ... ' + (plan.items.filter((x) => x.status !== 'exists').length - maxList) + ' more'); break; } lines.push('  ' + i.status.toUpperCase() + ' ' + i.id + ' "' + i.name + '" in ' + i.group + (i.def.variants ? ' (set of ' + i.def.variants.members.length + ')' : '') + (i.status === 'changed' ? (OPTS.supersede ? ' -> new master, old renamed (superseded)' : ' -> left as is (supersede off)') : '')); }
     const review = lib.components.filter((c) => c.band === 'review').length;
     lines.push('Review-band components: ' + review + ' (run "Review report")');
+    { // structured copy of the dry-run counts for UIs that render results (older UIs ignore it)
+      const ic = plan.items.filter((i) => i.kind === 'icon');
+      figma.ui.postMessage({ preview: { components: { create: count(cs, 'create'), exists: count(cs, 'exists'), changed: count(cs, 'changed') }, icons: { create: count(ic, 'create'), exists: count(ic, 'exists'), changed: count(ic, 'changed') }, sets, review, cycles: plan.cyc.slice(), supersede: !!OPTS.supersede, host: H.note, items: plan.items.filter((i) => i.status !== 'exists').slice(0, 300).map((i) => ({ status: i.status, kind: i.kind, id: i.id, name: i.name, group: i.group })) } });
+    }
     if (dsl.length) { lines.push('Design-system matches (report only):'); lines.push(...dsl); }
     const rep = head + '\n' + lines.join('\n');
     say(lines.join('\n'));

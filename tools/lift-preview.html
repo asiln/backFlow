@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- Dev preview for plugin-lift/ui.html outside Figma: serves the UI in an iframe and plays a fake host
+     (probe, prefs, and canned engine runs). Not Figma: it checks layout, states and copy, not plugin logic.
+     Open through any static server from the repo root, e.g. node fixtures/serve.mjs, then /tools/lift-preview.html
+     Query: ?slow=1 (long runs), ?empty=1 (file with nothing from Backflow), ?missing=1 (a font missing), ?w=400&h=680 -->
+<meta charset="utf-8">
+<title>Backflow preview</title>
+<style>
+  body { margin: 0; background: #1e1e1e; display: flex; align-items: flex-start; justify-content: center; padding: 24px; font: 12px system-ui; color: #ccc; }
+  iframe { border: 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.3), 0 12px 40px rgba(0,0,0,.35); background: #fff; }
+</style>
+<iframe id="ui" src="../plugin-lift/ui.html"></iframe>
+<script>
+const q = new URLSearchParams(location.search);
+const ui = document.getElementById('ui');
+ui.width = q.get('w') || 400; ui.height = q.get('h') || 680;
+const post = (m) => ui.contentWindow.postMessage({ pluginMessage: m }, '*');
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const SLOW = q.get('slow') ? 6 : 1; // ?slow=1 stretches runs so the running state can be captured
+let applied = { tokens: false, components: null }; // components: the applied library, so the probe counts what was built
+function probe() {
+  return {
+    file: 'Athlete app · design export', page: 'Screens',
+    fonts: { Inter: true, Vazirmatn: !q.get('missing'), 'Space Grotesk': true, 'JetBrains Mono': true },
+    tokens: applied.tokens ? { variables: 64, tagged: 58, collections: 3, textStyles: 14, paintStyles: 0, effectStyles: 3, stylesTagged: 17 } : { variables: 6, tagged: 0, collections: 1, textStyles: 2, paintStyles: 0, effectStyles: 0, stylesTagged: 0 },
+    components: applied.components ? { masters: applied.components.components.filter((c) => !c.variants).length, sets: applied.components.components.filter((c) => c.variants).length, icons: applied.components.icons.length, superseded: 0 } : { masters: 0, sets: 0, icons: 0, superseded: 0 },
+    screens: { sections: 1 }, errors: []
+  };
+}
+const engine = (mod, m) => post({ mod, m });
+async function runTokens(m) {
+  const items = [];
+  const st = m.action === 'dry' ? 'would create' : 'created';
+  // statuses follow the file: review stays review unless createReview; one text style is a demo conflict
+  const stOf = (x) => (x.status === 'review' && !m.opts.createReview ? 'review' : st);
+  const nm = (x, f, i) => (x.target && x.target.name) || x.name || x.key || (f + '/' + i);
+  (m.tokens.colors || []).forEach((c, i) => items.push({ status: stOf(c), family: 'colour', name: nm(c, 'color', i), detail: c.hex || '' }));
+  (m.tokens.textStyles || []).forEach((t, i) => items.push({ status: i === 1 && t.status !== 'review' ? 'conflict' : stOf(t), family: 'text', name: nm(t, 'text', i), detail: i === 1 ? 'file has 14/20, tokens.json 14/22' : '' }));
+  ['radii', 'spacing', 'effects', 'sizes'].forEach((k) => (m.tokens[k] || []).forEach((r, i) => items.push({ status: stOf(r), family: k, name: nm(r, k, i) })));
+  const counts = {}; items.forEach((i) => { counts[i.status] = (counts[i.status] || 0) + 1; });
+  for (let d = 0; d <= items.length; d += Math.max(1, items.length >> 3)) { engine('tokens', { progress: { done: d, total: items.length } }); await wait(60); }
+  engine('tokens', { log: (m.action === 'dry' ? 'DRY RUN: nothing will be changed.' : 'APPLY: creating only what is missing.') });
+  engine('tokens', { result: { action: m.action, json: JSON.stringify({ items }), counts, conflicts: counts.conflict || 0, failures: 0 } });
+  if (m.action === 'apply') applied.tokens = true;
+  engine('tokens', { finished: true });
+}
+async function runComponents(m) {
+  const lib = m.library, cs = lib.components, ic = lib.icons;
+  for (let i = 0; i <= cs.length; i++) { engine('components', { progress: { done: i, total: cs.length, item: cs[i] ? cs[i].id : 'done' } }); await wait(40 * SLOW * (i === 1 ? 20 : 1)); }
+  if (m.mode === 'dry') {
+    engine('components', { preview: { components: { create: cs.length, exists: 0, changed: 0 }, icons: { create: ic.length, exists: 0, changed: 0 }, sets: cs.filter((c) => c.variants).length, review: cs.filter((c) => c.band === 'review').length, cycles: [], supersede: m.opts.supersede, host: 'Masters go on the page “Components”.', items: cs.map((c) => ({ status: 'create', kind: 'cmp', id: c.id, name: c.name || c.id, group: c.group || 'components' })).concat(ic.map((c) => ({ status: 'create', kind: 'icon', id: c.id, name: c.name || c.id, group: 'icons' }))) } });
+    engine('components', { report: 'DRY RUN (nothing is created).', finished: true });
+  } else if (m.mode === 'apply') {
+    applied.components = lib;
+    engine('components', { report: 'APPLY finished.', finished: true });
+    await wait(20);
+    engine('components', { summary: { created: cs.length + ic.length, exists: 0, superseded: 0, metaUpdated: 0, failed: 0, cancelled: 0, sets: cs.filter((c) => c.variants).length, iconsCreated: ic.length, nodes: 0, instances: 6, flagged: 3, r: { R0: cs.length + ic.length - 3, R1: 2, R2: 1, R3: 0, R4: 0 }, errors: [], flags: ['cmp_card_1a2b: R1 description: not persisted', 'cmp_tab_77c1: R1 layoutWrap: unsupported', 'cmp_input_09fe: R2 bounds fixed 3px'] } });
+  } else engine('components', { report: 'Review-band components:\n  cmp_badge_3f1a "Badge" confidence 0.62\n  cmp_chip_2e90 "Chip" confidence 0.58', finished: true });
+}
+async function runImport(m) {
+  const frames = m.data.frames; const count = (f) => 1 + (f.children || []).reduce((a, k) => a + count(k), 0);
+  const total = frames.reduce((a, f) => a + count(f), 0);
+  for (let d = 0; d <= total; d += Math.max(1, total >> 4)) { engine('import', { progress: { done: d, total, screen: frames[Math.min(frames.length - 1, Math.floor(d * frames.length / (total + 1)))].name } }); await wait(50); }
+  engine('import', { log: 'Done.' });
+  engine('import', { summary: { seconds: 4.8, screens: frames.length, screensTotal: frames.length, cancelled: false, section: m.opts.sectionName || m.data.name || 'Backflow import',
+    stats: { frames: 214, text: 388, svg: 46, img: 9, autoLayout: 0, svgFail: 1, imgFail: 1, nodeFail: 0, styleFail: 0, bound: 0, rotated: 2, lv0: 171, lv1: 22, lv2: 9, lv3: 4, lvN: 0, degraded: 5, absKids: 12, textGuard: 3, wrapFix: 1 },
+    ds: { inst: 31, r0: 27, r1: 3, detached: 1, plain: 2, missing: 2, ovApplied: 64, ovFail: 0, icons: 18, tokBound: 412, tokMiss: 7, fixFill: 0, fuzzyVariant: 1, rejected: 0 },
+    opts: m.opts, degradedNotes: ['Dashboard / header: child 2 off by 6px', 'Program / card: wrap row height'], failNotes: ['svg icon-flame: unsupported <foreignObject>', 'image hero.jpg: cross-origin read blocked'] } });
+  engine('import', { finished: true });
+}
+window.addEventListener('message', async (e) => {
+  const env = e.data && e.data.pluginMessage; if (!env) return;
+  if (env.host === 'probe') { await wait(350); post({ host: 'probe', result: probe() }); }
+  else if (env.host === 'resize') { ui.width = env.w; ui.height = env.h; }
+  else if (env.mod === 'tokens' && env.m.type === 'run') runTokens(env.m);
+  else if (env.mod === 'components' && env.m.type === 'run') runComponents(env.m);
+  else if (env.mod === 'import' && env.m.type === 'build') runImport(env.m);
+});
+ui.addEventListener('load', () => post({ host: 'hello', prefs: {}, file: 'Athlete app · design export' }));
+</script>

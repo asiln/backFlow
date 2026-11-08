@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/inventory.schema.json",
-  "title": "Figma Lift: ds-inventory.json (spec 7.3)",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/inventory.schema.json",
+  "title": "Backflow: ds-inventory.json (spec 7.3)",
   "description": "Snapshot of the design system that already exists in the Figma file, written by plugin-tokens 'Export inventory'. valuesByMode is keyed by MODE ID (see collections[].modes); colour values are {r,g,b,a} floats, aliases are {type:'VARIABLE_ALIAS', id}.",
   "type": "object",
   "required": ["file", "generated", "collections", "variables", "paintStyles", "textStyles", "effectStyles", "components", "icons"],

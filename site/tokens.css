@@ -1,0 +1,80 @@
+/* Backflow design tokens. One source for the site, the README art and the plugin window.
+   Light theme = blueline (diazo print): blue linework on a cool sheet, red pen for redlines.
+   Dark theme  = cyanotype blueprint: white linework on Prussian blue.
+   Mirror of brand/tokens.json (DTCG). Change both together. */
+
+@font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2-variations"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("fonts/jetbrains-mono-var.woff2") format("woff2-variations"); font-weight: 100 800; font-display: swap; }
+
+:root {
+  color-scheme: light dark;
+
+  /* sheet */
+  --bf-sheet: #eef2f5;          /* the drawing sheet: page ground */
+  --bf-sheet-2: #e3e9ef;        /* inset: code wells, tracks, tags */
+  --bf-paper: #f8fafc;          /* raised field: inputs, the elevation drawing */
+  --bf-line: #c5d1e0;           /* blueline hairline: grid, dividers */
+  --bf-line-strong: #8fa3bf;    /* outlines, dimension lines */
+
+  /* ink */
+  --bf-ink: #1b1f24;            /* graphite: body copy */
+  --bf-ink-2: #46515f;          /* secondary copy, captions (7.2:1 on sheet) */
+  --bf-ink-3: #5f6b78;          /* hints, disabled labels (4.8:1 on sheet) */
+  --bf-blue: #1f4fa8;           /* blueline: linework, headings, primary action */
+  --bf-blue-hover: #183f88;
+  --bf-blue-soft: #dce5f4;      /* selection, pressed, info wash */
+  --bf-on-blue: #ffffff;
+
+  /* review: the only colours that carry state */
+  --bf-red: #b5261a;            /* red pen: redlines, revision clouds, REVISE, failures */
+  --bf-red-soft: #f9dcd8;
+  --bf-green: #23704a;          /* APPROVED, done */
+  --bf-green-soft: #d9eee2;
+  --bf-amber: #9a5500;          /* needs attention */
+  --bf-amber-soft: #fbecd3;
+
+  /* fidelity ladder: F0 is the goal, F3 is a floor, not a failure */
+  --bf-f0: var(--bf-green);
+  --bf-f1: var(--bf-blue);
+  --bf-f2: var(--bf-amber);
+  --bf-f3: var(--bf-ink-3);
+
+  /* type */
+  --bf-font: "Archivo", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --bf-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --bf-wide: 118%;              /* display: headlines, wordmark */
+  --bf-normal: 100%;            /* body */
+  --bf-narrow: 78%;             /* title-block labels, set in caps with +0.08em tracking */
+
+  /* shape and rhythm */
+  --bf-r-1: 2px;                /* tags, checkboxes */
+  --bf-r-2: 4px;                /* buttons, inputs, wells */
+  --bf-r-3: 6px;                /* panels, the drop overlay */
+  --bf-hair: 1px;
+  --bf-rule: 1.5px;             /* sheet border, dimension lines */
+  --bf-space: 4px;              /* rhythm unit: 4 8 12 16 24 32 48 72 */
+  --bf-ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bf-sheet: #0f2a55; --bf-sheet-2: #0b2147; --bf-paper: #143366;
+    --bf-line: #2f4c7c; --bf-line-strong: #6f86ad;
+    --bf-ink: #f2f6fb; --bf-ink-2: #c3cee0; --bf-ink-3: #9aabc6;
+    --bf-blue: #ffffff; --bf-blue-hover: #dce8ff; --bf-blue-soft: #1e4180; --bf-on-blue: #0f2a55;
+    --bf-red: #ff8f80; --bf-red-soft: #4a2440;
+    --bf-green: #7fdca6; --bf-green-soft: #163f4a;
+    --bf-amber: #f4c45a; --bf-amber-soft: #3d3a3a;
+    --bf-f3: #9aabc6;
+  }
+}
+:root[data-theme="dark"] {
+  --bf-sheet: #0f2a55; --bf-sheet-2: #0b2147; --bf-paper: #143366;
+  --bf-line: #2f4c7c; --bf-line-strong: #6f86ad;
+  --bf-ink: #f2f6fb; --bf-ink-2: #c3cee0; --bf-ink-3: #9aabc6;
+  --bf-blue: #ffffff; --bf-blue-hover: #dce8ff; --bf-blue-soft: #1e4180; --bf-on-blue: #0f2a55;
+  --bf-red: #ff8f80; --bf-red-soft: #4a2440;
+  --bf-green: #7fdca6; --bf-green-soft: #163f4a;
+  --bf-amber: #f4c45a; --bf-amber-soft: #3d3a3a;
+  --bf-f3: #9aabc6;
+}

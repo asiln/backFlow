@@ -1,6 +1,6 @@
-# Contributing to Figma Lift
+# Contributing to Backflow
 
-Thanks for helping. Figma Lift turns a running web app into real Figma auto-layout, so most contributions fall into one of: extractor fixes (`walker.js`), layout inference (`normalize.mjs`, `layout-sim.mjs`), the Figma plugin (`plugin/`), or docs.
+Thanks for helping. Backflow turns a running web app into real Figma auto-layout, so most contributions fall into one of: extractor fixes (`walker.js`), layout inference (`normalize.mjs`, `layout-sim.mjs`), the Figma plugin (`plugin/`), or docs.
 
 ## Ground rules
 
@@ -12,10 +12,10 @@ Thanks for helping. Figma Lift turns a running web app into real Figma auto-layo
 ## Setup
 
 ```
-git clone https://github.com/asiln/figma-lift.git
-cd figma-lift
+git clone https://github.com/asiln/backflow.git
+cd backflow
 npm install
-cp figma-lift.config.example.json figma-lift.config.json   # then edit it for your app
+cp backflow.config.example.json backflow.config.json   # then edit it for your app
 ```
 
 You need Node 18 or newer and a Chromium that Playwright can drive.

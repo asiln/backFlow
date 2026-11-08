@@ -8,6 +8,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { runPipeline, validateManifest } from './pipeline-lib.mjs';
+import { workDir } from './config.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const active = new Set();
@@ -22,7 +23,7 @@ function killTree(child) {
 
 function run(file, args, { timeoutMs, env, shell = false, onOut } = {}) {
   return new Promise((resolve) => {
-    const child = spawn(file, args, { cwd: here, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'], detached: process.platform !== 'win32', windowsHide: true });
+    const child = spawn(file, args, { cwd: workDir(), env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'], detached: process.platform !== 'win32', windowsHide: true });
     active.add(child);
     let out = ''; let timedOut = false;
     const take = (b) => { out += b; if (out.length > 200000) out = out.slice(-100000); if (onOut) onOut(String(b)); };
@@ -70,7 +71,7 @@ async function main() {
   const stop = () => { if (ctl.stop) return; ctl.stop = true; console.log('\ninterrupted: stopping, finally hooks will still run'); for (const c of active) killTree(c); };
   process.on('SIGINT', stop); process.on('SIGTERM', stop);
 
-  const summary = await runPipeline({ batchDir, manifest, toolDir: here, outRoot: out ? path.resolve(out) : undefined, extract: realExtract, exec: realExec, from, only, dryRun, ctl, log: (m) => console.log(m) });
+  const summary = await runPipeline({ batchDir, manifest, toolDir: workDir(), outRoot: out ? path.resolve(out) : undefined, extract: realExtract, exec: realExec, from, only, dryRun, ctl, log: (m) => console.log(m) });
   if (dryRun) {
     console.log(`dry run: ${summary.steps.length} step(s) in ${batchDir}`);
     console.log('preflight:'); for (const c of summary.preflight) console.log('  ' + c);
@@ -85,7 +86,7 @@ async function main() {
     process.exit(summary.problems.length ? 1 : 0);
   }
   const done = summary.steps.filter((s) => s.status === 'ok').length;
-  console.log(`\n${done}/${summary.steps.length} steps ok, ${summary.failedSteps.length} failed, ${summary.brokenScreens} broken screen(s), ${summary.elapsedSeconds}s. Summary: ${path.join(out ? path.resolve(out) : path.join(here, 'out', 'final'), summary.dir, 'SUMMARY.md')}`);
+  console.log(`\n${done}/${summary.steps.length} steps ok, ${summary.failedSteps.length} failed, ${summary.brokenScreens} broken screen(s), ${summary.elapsedSeconds}s. Summary: ${path.join(out ? path.resolve(out) : path.join(workDir(), 'out', 'final'), summary.dir, 'SUMMARY.md')}`);
   process.exit(!summary.ok ? 1 : summary.brokenScreens ? 2 : 0);
 }
 

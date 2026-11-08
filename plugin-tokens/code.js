@@ -1,4 +1,4 @@
-// Figma Lift Tokens: reads tokens.json (docs/ds-schema/tokens.schema.json) and the open file, three actions in one UI:
+// Backflow Tokens: reads tokens.json (docs/ds-schema/tokens.schema.json) and the open file, three actions in one UI:
 //   dry       every lookup, per-token status, changes nothing (a write attempt throws)
 //   apply     creates ONLY what is missing; idempotent; never renames, deletes or overwrites designer-made things
 //   inventory writes ds-inventory.json (docs/ds-schema/inventory.schema.json, spec 7.3)
@@ -527,7 +527,7 @@ async function runTokens(mode, tokens, opts) {
   post({ progress: { done: Math.min(i, tasks.length), total: tasks.length } });
   const sum = summarize(ITEMS);
   const out = {
-    tool: 'figma-lift-tokens', mode: DRY ? 'dry-run' : 'apply', generated: new Date().toISOString(), file: figma.root.name,
+    tool: 'backflow-tokens', mode: DRY ? 'dry-run' : 'apply', generated: new Date().toISOString(), file: figma.root.name,
     cancelled: cancelled, tokensProcessed: Math.min(i, tasks.length), tokensTotal: tasks.length, writes: writes.count,
     counts: sum.byStatus, byFamily: sum.byFamily, failures: ITEMS.filter((x) => x.status === 'failed').length,
     conflicts: ITEMS.filter((x) => x.status === 'conflict'), items: ITEMS,

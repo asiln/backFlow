@@ -4,6 +4,7 @@ out/
 state-*.json
 batches/
 private/
+backflow.config.json
 figma-lift.config.json
 *.dump
 *.bundle

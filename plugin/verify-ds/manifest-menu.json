@@ -1,6 +1,6 @@
 {
-  "name": "Figma Lift DS Verify (menu probe)",
-  "id": "figma-lift-verify-ds-menu-1",
+  "name": "Backflow DS Verify (menu probe)",
+  "id": "backflow-verify-ds-menu-1",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",

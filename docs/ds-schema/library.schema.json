@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/library.schema.json",
-  "title": "Figma Lift: _library.json (spec 7.2)",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/library.schema.json",
+  "title": "Backflow: _library.json (spec 7.2)",
   "description": "Global component and icon library written by componentize.mjs, read by plugin-components. Only accepted clusters (band auto|review) are listed; report-only clusters live in components-report.json. Optional parts: `root` is the SUPERSET exemplar (every optional node present); the `default` of a `bool` slot says whether it is visible in the default master.",
   "type": "object",
   "required": ["version", "generated", "components", "icons"],

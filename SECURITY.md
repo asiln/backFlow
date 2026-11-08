@@ -1,6 +1,6 @@
 # Security
 
-Figma Lift runs a headless browser against **your own local or staging apps** with **test accounts**, and writes JSON files to disk. It makes no network calls of its own besides the app you point it at, and the Figma plugin has network access disabled.
+Backflow runs a headless browser against **your own local or staging apps** with **test accounts**, and writes JSON files to disk. It makes no network calls of its own besides the app you point it at, and the Figma plugin has network access disabled.
 
 Things to keep in mind:
 

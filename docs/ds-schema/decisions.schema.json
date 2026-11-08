@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/decisions.schema.json",
-  "title": "Figma Lift: component-decisions.json (spec 1.9, shape defined by T1)",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/decisions.schema.json",
+  "title": "Backflow: component-decisions.json (spec 1.9, shape defined by T1)",
   "description": "Owner decisions saved by the review report and applied by `componentize.mjs --decisions`. The spec only names the verbs (accept / reject / rename / merge / split / treat as variant of); this schema fixes the shape. A decision targets a cluster by `id` (stable library id, preferred) or `sig` (S digest of the cluster leader). Effects on the next run: reject -> exclude; rename -> nameSource 'owner' (conf 100); accept -> conf 100 / band auto; merge -> merge `id` into `into`; split -> re-cluster by the named field; variant-of -> make `id` a variant set member of `into`.",
   "type": "object",
   "required": ["version", "decisions"],

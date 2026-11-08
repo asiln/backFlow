@@ -1,4 +1,4 @@
-// Figma Lift Import: builds Figma layers from the JSON the extractor writes.
+// Backflow Import: builds Figma layers from the JSON the extractor writes.
 // Defensive by design: every node and every optional styling step is wrapped, so one bad node never aborts the import.
 figma.showUI(__html__, { width: 380, height: 600 });
 
@@ -984,7 +984,7 @@ figma.ui.onmessage = async (msg) => {
     let left = 0;
     for (const c of page.children) left = Math.max(left, c.x + c.width);
     const section = figma.createSection();
-    section.name = (OPTS.sectionName || msg.data.name || 'Figma Lift import').slice(0, 80);
+    section.name = (OPTS.sectionName || msg.data.name || 'Backflow import').slice(0, 80);
     section.x = left ? left + 200 : 0; section.y = 0;
     const PAD = 80, GAP = 80, ROW_MAX = 6000;
     let cx = PAD, cy = PAD + 40, rowH = 0, maxRight = 0;
@@ -1018,6 +1018,8 @@ figma.ui.onmessage = async (msg) => {
     const bad = s.svgFail + s.imgFail + s.nodeFail + s.styleFail;
     if (!bad && (ds.ovFail || ds.tokMiss) && failNotes.length) say('Notes:' + String.fromCharCode(10) + '  ' + failNotes.join(String.fromCharCode(10) + '  '));
     say(bad ? 'FAILURES: svg ' + s.svgFail + ', image placeholders ' + s.imgFail + ', nodes ' + s.nodeFail + ', style steps ' + s.styleFail + (failNotes.length ? '\n  ' + failNotes.join('\n  ') : '') : 'No failures.');
+    // structured copy of the lines above for UIs that render results (older UIs ignore it)
+    figma.ui.postMessage({ summary: { seconds: (Date.now() - t0) / 1000, screens: created.length, screensTotal: frames.length, cancelled, section: section.name, stats: Object.assign({}, s), ds: Object.assign({}, ds), opts: Object.assign({}, OPTS), degradedNotes: noteVerify.slice(), failNotes: failNotes.slice() } });
     figma.ui.postMessage({ progress: { done: total, total, screen: 'done' }, finished: true });
   } catch (e) { say('Error: ' + (e && e.message ? e.message : e)); figma.ui.postMessage({ finished: true }); }
 };

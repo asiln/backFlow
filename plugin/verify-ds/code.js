@@ -1,4 +1,4 @@
-// Figma Lift DS Verify: runs experiments E1..E20 from docs/COMPONENTS-AND-DESIGN-SYSTEM-SPEC.md section 9 in a scratch file.
+// Backflow DS Verify: runs experiments E1..E20 from docs/COMPONENTS-AND-DESIGN-SYSTEM-SPEC.md section 9 in a scratch file.
 // Everything it creates is named FL_VERIFY_* (or lives inside a FL_VERIFY_* page/collection/style) and is removed at the end,
 // also when an experiment throws or times out. Output: one JSON object keyed E1..E20 plus CFG and _meta.
 // Plain ES2017 on purpose (no ?. or ??), same style as plugin/verify/code.js.
@@ -702,18 +702,18 @@ async function E18() {
   const c = COMP('e18-comp'); c.resize(40, 40);
   section.appendChild(c);
   const o = { parentType: c.parent ? c.parent.type : null };
-  c.description = 'Figma Lift conf 87 (review)';
+  c.description = 'Backflow conf 87 (review)';
   o.descriptionReadBack = c.description;
-  try { c.documentationLinks = [{ uri: 'https://example.com/figma-lift' }]; o.documentationLinks = c.documentationLinks.map((l) => l.uri); } catch (e) { o.documentationLinks = 'throws: ' + msg(e); }
+  try { c.documentationLinks = [{ uri: 'https://example.com/backflow' }]; o.documentationLinks = c.documentationLinks.map((l) => l.uri); } catch (e) { o.documentationLinks = 'throws: ' + msg(e); }
   const found = [];
   for (const p of figma.root.children) { try { if (p === figma.currentPage) found.push(...p.findAllWithCriteria({ types: ['COMPONENT'] }).filter((n) => n.id === c.id)); } catch (e) { /* page not loaded */ } }
   o.foundByTypeSearchOnPage = found.length === 1;
   o.assetsPanel = 'MANUAL CHECK: the plugin cannot read the Assets panel; components inside Sections are listed there by Figma design. Verify by hand if needed (the nodes are deleted at the end).';
-  const ok = o.parentType === 'SECTION' && o.descriptionReadBack === 'Figma Lift conf 87 (review)';
+  const ok = o.parentType === 'SECTION' && o.descriptionReadBack === 'Backflow conf 87 (review)';
   return {
     observed: o,
     decision: ok ? 'A component can live inside a Section; description persists' + (Array.isArray(o.documentationLinks) ? ' and documentationLinks too (store conf tags there or in the description).' : '; documentationLinks failed.') : 'Component in Section or description failed (see observed).',
-    flags: { componentInSectionOk: o.parentType === 'SECTION', descriptionPersists: o.descriptionReadBack === 'Figma Lift conf 87 (review)', documentationLinksWork: Array.isArray(o.documentationLinks) },
+    flags: { componentInSectionOk: o.parentType === 'SECTION', descriptionPersists: o.descriptionReadBack === 'Backflow conf 87 (review)', documentationLinksWork: Array.isArray(o.documentationLinks) },
   };
 }
 
@@ -821,7 +821,7 @@ async function cleanupAll(origPage) {
 
 async function main() {
   const origPage = figma.currentPage;
-  const meta = { plugin: 'figma-lift-verify-ds-1', startedAt: new Date().toISOString(), command: figma.command, editorType: figma.editorType, originalPage: origPage.name };
+  const meta = { plugin: 'backflow-verify-ds-1', startedAt: new Date().toISOString(), command: figma.command, editorType: figma.editorType, originalPage: origPage.name };
   const T0 = now();
   let cleanup = null;
   try {

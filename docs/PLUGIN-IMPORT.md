@@ -1,6 +1,6 @@
 # Import plugin: components and tokens
 
-`plugin/` ("Figma Lift Import") builds screens from `*.figma.json`. Two optional layers sit on top of the plain build. Both are inert unless the JSON carries the fields and the checkbox is on, so a plain export builds exactly as before.
+`plugin/` ("Backflow Import") builds screens from `*.figma.json`. Two optional layers sit on top of the plain build. Both are inert unless the JSON carries the fields and the checkbox is on, so a plain export builds exactly as before.
 
 | Option | Needs in the JSON | Needs in the Figma file |
 |---|---|---|

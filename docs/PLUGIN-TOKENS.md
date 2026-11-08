@@ -1,6 +1,6 @@
-# Figma Lift Tokens (plugin-tokens)
+# Backflow Tokens (plugin-tokens)
 
-Development plugin `Figma Lift Tokens` (id `figma-lift-tokens-1`, `documentAccess: dynamic-page`, no network). It reads `tokens.json` (`docs/ds-schema/tokens.schema.json`) and the open Figma file, and has three buttons in ONE UI:
+Development plugin `Backflow Tokens` (id `backflow-tokens-1`, `documentAccess: dynamic-page`, no network). It reads `tokens.json` (`docs/ds-schema/tokens.schema.json`) and the open Figma file, and has three buttons in ONE UI:
 
 | Button | What it does | Changes the file? |
 |---|---|---|
@@ -14,7 +14,7 @@ Files: `plugin-tokens/manifest.json`, `code.js`, `ui.html`, `_mock.mjs` (test, n
 
 1. Figma desktop app, open the target file.
 2. Menu: Plugins, Development, Import plugin from manifest..., choose `plugin-tokens/manifest.json`.
-3. Plugins, Development, Figma Lift Tokens.
+3. Plugins, Development, Backflow Tokens.
 4. Paste `tokens.json` or choose the file. The line under the picker shows the counts it found.
 5. Press Dry run. Read the summary and the list (failed, conflict, review first). Press Download result JSON to keep it.
 6. Press Apply, then press it again within 5 seconds (two-click confirm; browser dialogs are unreliable in the plugin sandbox). Run Dry run again afterwards: nothing should say `would create`.

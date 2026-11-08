@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/asiln/figma-lift/docs/ds-schema/tokens.schema.json",
-  "title": "Figma Lift: tokens.json (spec 4.4)",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/tokens.schema.json",
+  "title": "Backflow: tokens.json (spec 4.4)",
   "description": "Written by tokens.mjs, read by plugin-tokens and componentize.mjs. Colour entries are unique per (key, role): the same colour used as fill and as text gives two entries (CONTRACT-NOTES #8). `count` = number of node-field uses; `screens` = distinct screens.",
   "type": "object",
   "required": ["version", "generated", "source", "config", "colors", "gradients", "textStyles", "radii", "spacing", "effects", "findings"],

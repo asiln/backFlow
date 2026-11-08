@@ -1,7 +1,7 @@
 // Cross-platform browser launcher (Windows, macOS, Linux).
-// Order: $FIGMA_LIFT_CHROME -> Playwright's own matching browser -> any Chromium already in the
+// Order: $BACKFLOW_CHROME (or the pre-1.0 $FIGMA_LIFT_CHROME) -> Playwright's own matching browser -> any Chromium already in the
 // Playwright cache (versions drift) -> system Chrome / Edge.
-// If nothing works run: npx playwright-core install chromium   (or set FIGMA_LIFT_CHROME to a Chrome binary)
+// If nothing works run: npx playwright-core install chromium   (or set BACKFLOW_CHROME to a Chrome binary)
 import { chromium } from 'playwright-core';
 import fs from 'fs'; import path from 'path'; import os from 'os';
 
@@ -32,7 +32,8 @@ function cachedChromiums() {
 }
 
 export async function launchBrowser({ headless = true } = {}) {
-  if (process.env.FIGMA_LIFT_CHROME) return chromium.launch({ executablePath: process.env.FIGMA_LIFT_CHROME, headless });
+  const exe = process.env.BACKFLOW_CHROME || process.env.FIGMA_LIFT_CHROME;
+  if (exe) return chromium.launch({ executablePath: exe, headless });
   const errors = [];
   try { return await chromium.launch({ headless }); } catch (e) { errors.push(String(e.message || e).split('\n')[0]); }
   for (const exe of cachedChromiums()) {
@@ -41,5 +42,5 @@ export async function launchBrowser({ headless = true } = {}) {
   for (const channel of ['chrome', 'msedge']) {
     try { return await chromium.launch({ channel, headless }); } catch (e) { errors.push(String(e.message || e).split('\n')[0]); }
   }
-  throw new Error('No usable Chromium found. Run "npx playwright-core install chromium" or set FIGMA_LIFT_CHROME to a Chrome/Chromium binary.\n' + errors.join('\n'));
+  throw new Error('No usable Chromium found. Run "npx playwright-core install chromium" or set BACKFLOW_CHROME to a Chrome/Chromium binary.\n' + errors.join('\n'));
 }
