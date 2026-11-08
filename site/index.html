@@ -320,7 +320,7 @@ html { scrollbar-color: var(--bf-line-strong) var(--bf-sheet); }
           <div class="field">
             <div class="cell">
               <span class="label" id="cmd-l">Try it on your app</span>
-              <code aria-labelledby="cmd-l"><span class="p">$ </span><span id="cmd">npx github:asiln/backflow init</span></code>
+              <code aria-labelledby="cmd-l"><span class="p">$ </span><span id="cmd">npx backflow-cli init</span></code>
             </div>
             <button class="copy" type="button" data-copy="#cmd">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>
@@ -490,7 +490,7 @@ html { scrollbar-color: var(--bf-line-strong) var(--bf-sheet); }
       <div class="flow-m">
         <ol>
           <li><h3>Your app, running locally</h3><code>localhost:3000</code><p>Use test accounts. The extractor refuses any other origin.</p></li>
-          <li><h3>Extract</h3><code>npx github:asiln/backflow extract screens.json</code><p>Reads computed styles, geometry, text, SVG icons and images for each screen.</p></li>
+          <li><h3>Extract</h3><code>npx backflow-cli extract screens.json</code><p>Reads computed styles, geometry, text, SVG icons and images for each screen.</p></li>
           <li><h3>Measured JSON</h3><code>screens.figma.json · tokens.json · _library.json</code><p>Plus a report for every screen with what was lost and why.</p></li>
           <li><h3>Figma plugin</h3><p>Tokens, then Components, then Screens. Each step previews before it changes the file.</p></li>
           <li><h3>Design reviews</h3><p>Decisions flow back to the code.</p></li>

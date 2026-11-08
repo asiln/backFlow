@@ -27,8 +27,8 @@ Private by construction: the plugin has no network access and capture runs on yo
 
 Get started:
 ```
-npx github:asiln/backflow init
-npx github:asiln/backflow extract screens.json
+npx backflow-cli init
+npx backflow-cli extract screens.json
 ```
 Then drop the JSON files on the plugin window. Docs: https://github.com/asiln/backflow
 

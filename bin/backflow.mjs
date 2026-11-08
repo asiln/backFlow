@@ -31,9 +31,9 @@ ${Object.entries(SCRIPTS).map(([k, [, , d]]) => `  ${k.padEnd(w)}  ${d}`).join('
   ${'plugin'.padEnd(w)}  Copy the Figma plugin to ./backflow-figma-plugin for Plugins > Development > Import
 
 Quick start:
-  npx github:asiln/backflow init                 # then list your screens in screens.json
-  npx github:asiln/backflow extract screens.json # -> out/screens.figma.json
-  npx github:asiln/backflow plugin               # import its manifest.json in Figma desktop, drop the JSON on it
+  npx backflow-cli init                 # then list your screens in screens.json
+  npx backflow-cli extract screens.json # -> out/screens.figma.json
+  npx backflow-cli plugin               # import its manifest.json in Figma desktop, drop the JSON on it
 
 Localhost only. Use test accounts; the password comes from $BACKFLOW_TEST_PASSWORD.
 Docs: ${pkg.homepage || 'https://github.com/asiln/backflow'}`);
@@ -62,7 +62,7 @@ function init() {
   const missing = want.filter((l) => !have.split(/\r?\n/).includes(l));
   if (missing.length) { fs.appendFileSync(gi, (have && !have.endsWith('\n') ? '\n' : '') + '# backflow: exports and sessions stay private\n' + missing.join('\n') + '\n'); console.log(`updated   .gitignore (+${missing.join(', ')})`); }
   console.log(`\nNext: set baseUrl in backflow.config.json, list your screens, then run
-  npx github:asiln/backflow extract screens.json
+  npx backflow-cli extract screens.json
 Add "phone": "<test account id>" to screens.json for logged-in pages, with $BACKFLOW_TEST_PASSWORD set.`);
 }
 

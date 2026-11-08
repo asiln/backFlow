@@ -234,7 +234,7 @@ Icons are authored 16×16 strokes: no fill, `currentColor`, 1.25 stroke, round c
 
 ## Components
 
-- **Command field** (site): a title-block field with the label "Try it on your app", one real command (`npx github:asiln/backflow init`) and a Copy button on a `blue` fill. Copy confirms with a toast, or explains how to copy by hand.
+- **Command field** (site): a title-block field with the label "Try it on your app", one real command (`npx backflow-cli init`) and a Copy button on a `blue` fill. Copy confirms with a toast, or explains how to copy by hand.
 - **Elevation drawing** (site): the sample screen as linework with dimension lines (390, 844, 12, 16), part notes on leaders, a dashed ghost of the old button, a revision cloud with delta 1 and a REVISE stamp. Hovering (or tapping) a part reveals its measurements.
 - **Title block, schedule, General Notes, fidelity ladder legend, revision history** (site): drawing-set conventions used as the page's structure.
 - **Review stamps**: Approved (green), Revise (red), Rejected (ink, struck through), rotated −4°.
