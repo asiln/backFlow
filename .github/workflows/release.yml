@@ -1,0 +1,54 @@
+# Publishes @backflow/cli to npm whenever a GitHub release is published (or by hand from the Actions tab).
+#
+# Two ways to authenticate, use whichever is set up:
+#   1. Trusted publishing (no secrets): on npmjs.com, package @backflow/cli > Settings > Trusted publishing >
+#      GitHub Actions, repository asiln/backFlow, workflow release.yml. npm then trusts this workflow directly.
+#   2. NPM_TOKEN secret: a granular npm token created with "Bypass two-factor authentication", stored under
+#      GitHub repo Settings > Secrets and variables > Actions > New repository secret, name NPM_TOKEN.
+#      Needed for the very first publish, because trusted publishing is configured on an existing package.
+name: Release to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # trusted publishing and provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Use an npm that supports trusted publishing
+        run: npm install -g npm@11.6.2
+
+      - name: Check the tag matches package.json
+        if: github.event_name == 'release'
+        run: |
+          v=$(node -p "require('./package.json').version")
+          [ "${GITHUB_REF_NAME#v}" = "$v" ] || { echo "Tag $GITHUB_REF_NAME does not match package.json version $v"; exit 1; }
+
+      - run: npm ci
+
+      - run: npm test
+
+      - name: Skip if this version is already on npm
+        id: check
+        run: |
+          v=$(node -p "require('./package.json').version")
+          if npm view "@backflow/cli@$v" version >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; echo "@backflow/cli@$v is already published"; fi
+
+      - name: Publish
+        if: steps.check.outputs.exists != 'true'
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
