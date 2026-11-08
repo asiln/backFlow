@@ -7,7 +7,7 @@
   "bin": {
     "backflow": "bin/backflow.mjs"
   },
-  "homepage": "https://github.com/asiln/backflow#readme",
+  "homepage": "https://backflow-pi.vercel.app",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/asiln/backflow.git"
