@@ -1,5 +1,5 @@
 {
-  "name": "@backflow/cli",
+  "name": "backflow-cli",
   "version": "1.0.0",
   "description": "Your running web app, drawn as built in Figma: real auto-layout, design tokens, components and variants. Local, no API quota.",
   "license": "MIT",

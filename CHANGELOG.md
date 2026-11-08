@@ -5,7 +5,7 @@
 First release as **Backflow** (formerly Figma Lift).
 
 - New name, mark and visual identity (blueline / blueprint). Brand assets and tokens in `brand/`.
-- `backflow` CLI, run straight from GitHub with `npx github:asiln/backflow` (an npm package, `@backflow/cli`, will follow): `init`, `extract`, `run`, `pipeline`, `tokens`, `components`, `diff`, `plugin`. Through the CLI, `out/`, sessions and `backflow.config.json` live in the folder you run it from.
+- `backflow` CLI, run straight from GitHub with `npx github:asiln/backflow` (an npm package, `backflow-cli`, will follow): `init`, `extract`, `run`, `pipeline`, `tokens`, `components`, `diff`, `plugin`. Through the CLI, `out/`, sessions and `backflow.config.json` live in the folder you run it from.
 - One Figma plugin, **Backflow**: Fonts → Tokens → Components → Screens checklist, preview before apply, results as numbers. Full Backflow skin, following Figma's light and dark theme.
 - Design system: token harvest, component detection with variants, icon sets, instances with tokens bound.
 - Landing site in `site/`.

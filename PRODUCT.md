@@ -31,7 +31,7 @@ All four of these together are the claim. Future work keeps all of them:
 
 ## Operating Context
 
-- Terminal: the `backflow` CLI (`bin/backflow.mjs`, npm `@backflow/cli`) wrapping `extract.mjs`, `run-all.mjs`, `pipeline.mjs` (a manifest with preflight, before/after and finally hooks), `diff.mjs` (pixel fidelity check), `tokens.mjs`, `componentize.mjs`, and `plugin-mock.mjs` (the plugin run against a mocked Figma API).
+- Terminal: the `backflow` CLI (`bin/backflow.mjs`, npm `backflow-cli`) wrapping `extract.mjs`, `run-all.mjs`, `pipeline.mjs` (a manifest with preflight, before/after and finally hooks), `diff.mjs` (pixel fidelity check), `tokens.mjs`, `componentize.mjs`, and `plugin-mock.mjs` (the plugin run against a mocked Figma API).
 - Figma desktop, development plugins: **Backflow** (`plugin-lift/`, the merged plugin), and the single-purpose **Backflow Import** (`plugin/`), **Backflow Tokens** (`plugin-tokens/`), **Backflow Components** (`plugin-components/`), plus verification plugins (`plugin/verify/`, `plugin/verify-ds/`).
 - The intended order in Figma: Tokens (dry run, then apply), Components (dry run, then apply), Import with "Use components" and "Bind tokens".
 - Artifacts: batch JSON files, `out/<batch>.figma.json`, per-screen reports with warnings, `summary.json` / `SUMMARY.md`, `tokens.json`, `_library.json`.
@@ -49,7 +49,7 @@ All four of these together are the claim. Future work keeps all of them:
 
 ## Brand Commitments
 
-- Name: **Backflow** (formerly Figma Lift). Plugin names: "Backflow", and "Backflow Import / Tokens / Components" for the single-purpose plugins. npm: `@backflow/cli`, command `backflow`.
+- Name: **Backflow** (formerly Figma Lift). Plugin names: "Backflow", and "Backflow Import / Tokens / Components" for the single-purpose plugins. npm: `backflow-cli`, command `backflow`.
 - Identity: the As-Built drawing set (chosen by the user, 2026-11-08). Blueline light theme, cyanotype Blueprint dark theme, Archivo and JetBrains Mono, the one-stroke "b" mark. Source of truth: `brand/` and DESIGN.md.
 - The plugin window carries the full Backflow skin (user decision), not Figma's UI3 look.
 - Fully open source and community run: MIT, free for everyone, funded by sponsors. No paid tier, no account.

@@ -1,7 +1,7 @@
-# Publishes @backflow/cli to npm whenever a GitHub release is published (or by hand from the Actions tab).
+# Publishes backflow-cli to npm whenever a GitHub release is published (or by hand from the Actions tab).
 #
 # Two ways to authenticate, use whichever is set up:
-#   1. Trusted publishing (no secrets): on npmjs.com, package @backflow/cli > Settings > Trusted publishing >
+#   1. Trusted publishing (no secrets): on npmjs.com, package backflow-cli > Settings > Trusted publishing >
 #      GitHub Actions, repository asiln/backFlow, workflow release.yml. npm then trusts this workflow directly.
 #   2. NPM_TOKEN secret: a granular npm token created with "Bypass two-factor authentication", stored under
 #      GitHub repo Settings > Secrets and variables > Actions > New repository secret, name NPM_TOKEN.
@@ -45,7 +45,7 @@ jobs:
         id: check
         run: |
           v=$(node -p "require('./package.json').version")
-          if npm view "@backflow/cli@$v" version >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; echo "@backflow/cli@$v is already published"; fi
+          if npm view "backflow-cli@$v" version >/dev/null 2>&1; then echo "exists=true" >> "$GITHUB_OUTPUT"; echo "backflow-cli@$v is already published"; fi
 
       - name: Publish
         if: steps.check.outputs.exists != 'true'
