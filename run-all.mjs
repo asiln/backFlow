@@ -6,6 +6,7 @@
 // --only matches batch file names and screen names (case-insensitive substring).
 import fs from 'fs'; import path from 'path'; import { fileURLToPath } from 'url';
 import { runBatch } from './extract.mjs';
+import { workDir } from './config.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -15,7 +16,7 @@ const dirArg = args[0];
 if (!dirArg) { console.error('usage: node run-all.mjs <batch-dir> [--only <substring>]'); process.exit(1); }
 const dir = path.resolve(dirArg);
 if (!fs.existsSync(dir)) { console.error('no such directory: ' + dir); process.exit(1); }
-const outDir = path.join(here, 'out', path.basename(dir));
+const outDir = path.join(workDir(), 'out', path.basename(dir));
 fs.mkdirSync(outDir, { recursive: true });
 
 const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && !f.startsWith('_')).sort();
@@ -37,7 +38,7 @@ for (const f of files) {
       for (const w of r.warnings) console.log('         ' + w);
       if (r.broken) anyBroken = true;
     }
-    summary.batches.push({ batch: name, file: path.relative(here, res.outFile), screens: res.report.length, seconds: Math.round((Date.now() - t0) / 1000) });
+    summary.batches.push({ batch: name, file: path.relative(workDir(), res.outFile), screens: res.report.length, seconds: Math.round((Date.now() - t0) / 1000) });
   } catch (e) {
     anyBroken = true;
     summary.batches.push({ batch: name, error: String(e && e.message || e) });

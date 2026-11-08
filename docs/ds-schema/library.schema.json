@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/library.schema.json",
+  "title": "Backflow: _library.json (spec 7.2)",
+  "description": "Global component and icon library written by componentize.mjs, read by plugin-components. Only accepted clusters (band auto|review) are listed; report-only clusters live in components-report.json. Optional parts: `root` is the SUPERSET exemplar (every optional node present); the `default` of a `bool` slot says whether it is visible in the default master.",
+  "type": "object",
+  "required": ["version", "generated", "components", "icons"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "generated": { "type": "string" },
+    "params": { "type": "object" },
+    "components": { "type": "array", "items": { "$ref": "#/$defs/LibComponent" } },
+    "icons": { "type": "array", "items": { "$ref": "#/$defs/LibIcon" } }
+  },
+  "$defs": {
+    "Slot": {
+      "type": "object",
+      "required": ["s", "kind", "path", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "s": { "$ref": "cmp.schema.json#/$defs/SlotId", "description": "slot id = index in slots[] as a decimal string; nested instance slots are addressed '<outer>.<inner>' in Override.s" },
+        "kind": { "enum": ["text", "bool", "swap", "img", "fill", "inst", "slot"] },
+        "path": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "description": "child indices from the component root; [] = the root itself" },
+        "name": { "type": "string", "description": "Figma component property name (Label, Show icon, Icon ...)" },
+        "default": { "type": ["string", "boolean"] },
+        "prop": { "type": "string" },
+        "fixedRuns": { "type": "boolean" }
+      }
+    },
+    "LibComponent": {
+      "type": "object",
+      "required": ["id", "name", "group", "conf", "band", "nameSource", "root", "slots", "stats"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^cmp_[A-Za-z0-9_-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "group": { "type": "string", "minLength": 1 },
+        "conf": { "type": "number", "minimum": 0, "maximum": 100 },
+        "band": { "enum": ["auto", "review"] },
+        "nameSource": { "enum": ["owner", "ds", "role", "aria", "shape", "hash"] },
+        "sig": { "type": "string", "description": "S+M hash of the leader (plugin data figmalift.sig, spec 2.1). Optional addition." },
+        "ds": {
+          "type": "object", "required": ["name", "score", "mode"], "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" }, "key": { "type": "string" }, "name": { "type": "string" },
+            "score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "mode": { "enum": ["report", "prefer-ds", "prefer-own"] },
+            "propMap": { "type": "object", "additionalProperties": { "type": "string" } },
+            "variantMap": { "type": "array", "items": { "type": "object", "additionalProperties": { "type": "string" } } }
+          }
+        },
+        "root": { "$ref": "node.schema.json#/$defs/Node" },
+        "slots": { "type": "array", "items": { "$ref": "#/$defs/Slot" } },
+        "variants": {
+          "type": "object", "required": ["props", "members"], "additionalProperties": false,
+          "properties": {
+            "props": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "array", "minItems": 1, "items": { "type": "string" } } },
+            "members": {
+              "type": "array", "minItems": 1,
+              "items": {
+                "type": "object", "required": ["v", "root", "n"], "additionalProperties": false,
+                "properties": { "v": { "$ref": "cmp.schema.json#/$defs/VariantMap" }, "root": { "$ref": "node.schema.json#/$defs/Node" }, "n": { "type": "integer", "minimum": 1 } }
+              }
+            }
+          }
+        },
+        "stats": {
+          "type": "object", "required": ["occ", "screens", "files", "devMean", "devMax"], "additionalProperties": false,
+          "properties": { "occ": { "type": "integer", "minimum": 1 }, "screens": { "type": "integer", "minimum": 1 }, "files": { "type": "integer", "minimum": 1 }, "devMean": { "type": "number", "minimum": 0 }, "devMax": { "type": "number", "minimum": 0 } }
+        },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "LibIcon": {
+      "type": "object",
+      "required": ["id", "name", "geom", "vb", "kind", "svg", "sizes", "vecPaths"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^ic_[A-Za-z0-9_-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "geom": { "type": "string", "minLength": 1 },
+        "vb": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } },
+        "kind": { "enum": ["stroke", "fill"] },
+        "strokeWidth": { "type": "number", "minimum": 0 },
+        "svg": { "type": "string", "pattern": "^<svg" },
+        "sizes": { "type": "object", "description": "render size (px, as a string key) -> occurrence count", "additionalProperties": { "type": "integer", "minimum": 1 } },
+        "vecPaths": { "type": "array", "items": { "type": "array", "items": { "type": "integer", "minimum": 0 } } },
+        "ds": { "type": "object", "required": ["name"], "additionalProperties": false, "properties": { "id": { "type": "string" }, "name": { "type": "string" } } },
+        "dominantColor": { "$ref": "tok.schema.json#/$defs/ColourKey" }
+      }
+    }
+  }
+}

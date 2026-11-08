@@ -1,12 +1,12 @@
-// usage: node extract.mjs <batch.json> [out.json] [--only <substring>] [--strict]
+// usage: node extract.mjs <batch.json> [out.json] [--only <substring>] [--strict] [--report <file>]
 // batch: { "phone": "test-user-id", "width": 390, "height": 844, "base": "http://localhost:3000", "fullPage": false,
 //          "screens": [ { "name": "Athlete / Dashboard", "path": "/dashboard", "setup": "click('^ok$')", "delayMs": 2500,
 //                         "tutorial": false, "fullPage": true, "selector": "[role=dialog]", "backdrop": true } ] }
-// Local app only. Test accounts only. Credentials and app specifics come from config.mjs (figma-lift.config.json, $FIGMA_LIFT_TEST_PASSWORD).
+// Local app only. Test accounts only. Credentials and app specifics come from config.mjs (backflow.config.json, $BACKFLOW_TEST_PASSWORD).
 // Never point this at production.
 // Also importable: import { runBatch } from './extract.mjs'
 import { normalize, summarize } from './normalize.mjs';
-import { loadConfig } from './config.mjs';
+import { loadConfig, workDir } from './config.mjs';
 import { launchBrowser } from './browser.mjs';
 import fs from 'fs'; import path from 'path'; import os from 'os'; import { fileURLToPath, pathToFileURL } from 'url';
 
@@ -47,7 +47,7 @@ export async function runBatch(batchFile, outFile, opts = {}) {
   const only = opts.only ? String(opts.only).toLowerCase() : null;
   const log = opts.log || console.log;
   const batch = JSON.parse(fs.readFileSync(batchFile, 'utf8'));
-  outFile = outFile || path.join(here, 'out', path.basename(batchFile, '.json') + '.figma.json');
+  outFile = outFile || path.join(workDir(), 'out', path.basename(batchFile, '.json') + '.figma.json');
   const CFG = loadConfig();
   const base = batch.base || CFG.baseUrl;
   const api = (batch.api || CFG.apiUrl) + CFG.apiPrefix;
@@ -60,13 +60,13 @@ export async function runBatch(batchFile, outFile, opts = {}) {
   const report = [];
   let ctx;
   try {
-    const stateFile = path.join(here, `state-${batch.phone || 'anon'}.json`);
+    const stateFile = path.join(workDir(), `state-${batch.phone || 'anon'}.json`);
     const mobile = batch.width < 500;
     const ctxOpts = { viewport: { width: batch.width, height: batch.height }, locale: batch.locale || CFG.locale, deviceScaleFactor: 1, hasTouch: mobile, isMobile: mobile };
     if (batch.phone && fs.existsSync(stateFile)) ctxOpts.storageState = stateFile;
     ctx = await browser.newContext(ctxOpts);
     if (batch.phone && !ctxOpts.storageState) {
-      if (!CFG.password) throw new Error('No test password: set FIGMA_LIFT_TEST_PASSWORD (or "password" in figma-lift.config.json)');
+      if (!CFG.password) throw new Error('No test password: set BACKFLOW_TEST_PASSWORD (or "password" in backflow.config.json)');
       const r = await ctx.request.post(`${api}${CFG.login.path}`, { data: { [CFG.login.identifierField]: batch.phone, [CFG.login.passwordField]: CFG.password } });
       if (!r.ok()) throw new Error('login failed ' + r.status());
       await ctx.storageState({ path: stateFile });
@@ -258,12 +258,14 @@ if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === imp
   const args = process.argv.slice(2);
   const flag = (n) => { const i = args.indexOf(n); if (i < 0) return null; const v = args[i + 1]; args.splice(i, 2); return v; };
   const only = flag('--only');
+  const reportFile = flag('--report');
   const si = args.indexOf('--strict'); const strict = si >= 0; if (si >= 0) args.splice(si, 1);
   const noLayout = args.indexOf('--no-layout'); if (noLayout >= 0) args.splice(noLayout, 1);
   const [batchFile, outFile] = args;
-  if (!batchFile) { console.error('usage: node extract.mjs <batch.json> [out.json] [--only <substring>] [--strict] [--no-layout]'); process.exit(1); }
+  if (!batchFile) { console.error('usage: node extract.mjs <batch.json> [out.json] [--only <substring>] [--strict] [--no-layout] [--report <file>]'); process.exit(1); }
   try {
     const res = await runBatch(batchFile, outFile, { only, layout: noLayout < 0 });
+    if (reportFile) fs.writeFileSync(reportFile, JSON.stringify(res.report));
     process.exit(strict && res.broken ? 2 : 0);
   } catch (e) { console.error(e && e.message ? e.message : e); process.exit(1); }
 }

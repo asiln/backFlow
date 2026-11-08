@@ -1,6 +1,6 @@
 {
-  "name": "Figma Lift Auto-layout Verify",
-  "id": "figma-lift-verify-1",
+  "name": "Backflow Auto-layout Verify",
+  "id": "backflow-verify-1",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",

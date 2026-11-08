@@ -1,0 +1,60 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+body{font:12px Inter,system-ui,sans-serif;margin:12px;color:#222}
+h4{margin:10px 0 4px;font-size:12px}
+#s{font-weight:600;margin-bottom:6px}
+#warn{display:none;background:#fff3cd;border:1px solid #e0c36a;padding:6px 8px;border-radius:6px;margin-bottom:6px}
+#list{border:1px solid #ddd;border-radius:6px;max-height:230px;overflow:auto}
+.row{display:flex;gap:8px;padding:3px 8px;border-bottom:1px solid #eee}
+.row:last-child{border-bottom:0}
+.id{width:32px;font-weight:600}
+.t{flex:1}
+.st{width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.pending .st{color:#999}.running .st{color:#b36b00}.ok .st,.ok-fallback-font .st{color:#1a7f37}.error .st,.timeout .st{color:#c62828}.skipped .st{color:#999}
+textarea{width:100%;box-sizing:border-box;font:11px monospace}
+#cfg{height:150px}#json{height:170px}
+button{margin-top:8px;margin-right:6px;padding:8px 12px;border:0;border-radius:6px;background:#5b38d6;color:#fff;font-weight:600;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+</style>
+<div id="s">Running experiments (the scratch file is modified and cleaned up automatically)...</div>
+<div id="warn"></div>
+<div id="list"></div>
+<h4>CFG block (derived flags; null = unknown because the experiment failed)</h4>
+<textarea id="cfg" readonly></textarea>
+<h4>Full result JSON (E1..E20 + CFG + _meta)</h4>
+<textarea id="json" readonly></textarea>
+<button id="c" disabled>Copy all</button><button id="cc" disabled>Copy CFG only</button>
+<script>
+var IDS = []; for (var i = 1; i <= 20; i++) IDS.push('E' + i);
+var list = document.getElementById('list');
+IDS.forEach(function (id) {
+  var d = document.createElement('div'); d.className = 'row pending'; d.id = 'r-' + id;
+  d.innerHTML = '<span class="id">' + id + '</span><span class="t"></span><span class="st">waiting</span>'; list.appendChild(d);
+});
+function setRow(m) {
+  var d = document.getElementById('r-' + m.id); if (!d) return;
+  d.className = 'row ' + m.state;
+  if (m.title) d.querySelector('.t').textContent = m.title;
+  d.querySelector('.st').textContent = m.state + (m.ms != null ? ' ' + Math.round(m.ms) + 'ms' : '');
+  d.title = (m.decision || '') + (m.error ? '\nERROR: ' + m.error : '');
+}
+onmessage = function (e) {
+  var m = e.data.pluginMessage; if (!m) return;
+  if (m.type === 'progress') setRow(m);
+  if (m.type === 'warn') { var w = document.getElementById('warn'); w.style.display = 'block'; w.textContent = m.text; }
+  if (m.type === 'done') {
+    document.getElementById('json').value = m.json; document.getElementById('cfg').value = m.cfg;
+    document.getElementById('s').textContent = 'Done and cleaned up. Press Copy all and send the text back. ' + (m.summary || '');
+    document.getElementById('c').disabled = false; document.getElementById('cc').disabled = false;
+  }
+};
+function copy(text) {
+  var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
+  var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(t);
+  if (!ok && navigator.clipboard) navigator.clipboard.writeText(text);
+}
+document.getElementById('c').onclick = function () { copy(document.getElementById('cfg').value + '\n\n' + document.getElementById('json').value); };
+document.getElementById('cc').onclick = function () { copy(document.getElementById('cfg').value); };
+</script>

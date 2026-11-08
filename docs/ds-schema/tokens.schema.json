@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/tokens.schema.json",
+  "title": "Backflow: tokens.json (spec 4.4)",
+  "description": "Written by tokens.mjs, read by plugin-tokens and componentize.mjs. Colour entries are unique per (key, role): the same colour used as fill and as text gives two entries (CONTRACT-NOTES #8). `count` = number of node-field uses; `screens` = distinct screens.",
+  "type": "object",
+  "required": ["version", "generated", "source", "config", "colors", "gradients", "textStyles", "radii", "spacing", "effects", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "generated": { "type": "string" },
+    "source": {
+      "type": "object", "required": ["files", "screens", "nodes"], "additionalProperties": false,
+      "properties": { "files": { "type": "integer", "minimum": 0 }, "screens": { "type": "integer", "minimum": 0 }, "nodes": { "type": "integer", "minimum": 0 } }
+    },
+    "config": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "colorDeltaE": { "type": "number" }, "alphaTol": { "type": "number" }, "minUses": { "type": "integer" }, "minScreens": { "type": "integer" } }
+    },
+    "colors": { "type": "array", "items": { "$ref": "#/$defs/ColourToken" } },
+    "gradients": { "type": "array", "items": { "$ref": "#/$defs/GenericToken" } },
+    "textStyles": { "type": "array", "items": { "$ref": "#/$defs/GenericToken" } },
+    "radii": { "type": "array", "items": { "$ref": "#/$defs/GenericToken" } },
+    "spacing": { "type": "array", "items": { "$ref": "#/$defs/GenericToken" } },
+    "effects": { "type": "array", "items": { "$ref": "#/$defs/GenericToken" } },
+    "sizes": { "type": "array", "items": { "$ref": "#/$defs/GenericToken" }, "description": "sz:h<n> entries (spec 4.1 lists the family, 4.4 shows no array: optional here)" },
+    "findings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "Status": { "enum": ["bound", "create", "review", "off-scale", "skip"] },
+    "Existing": { "oneOf": [{ "type": "null" }, { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "name": { "type": "string" } } }] },
+    "ColourToken": {
+      "type": "object", "required": ["key", "role", "hex", "a", "count", "screens", "status"],
+      "properties": {
+        "key": { "$ref": "tok.schema.json#/$defs/ColourKey" },
+        "role": { "enum": ["fill", "text", "stroke", "icon", "shadow", "gradient-stop"] },
+        "hex": { "type": "string", "pattern": "^#[0-9A-F]{6}$" },
+        "a": { "type": "number", "minimum": 0, "maximum": 1 },
+        "count": { "type": "integer", "minimum": 1 },
+        "screens": { "type": "integer", "minimum": 1 },
+        "roles": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "tailwind": { "type": "string" },
+        "target": {
+          "type": "object", "required": ["collection", "name"],
+          "properties": { "collection": { "type": "string" }, "name": { "type": "string" }, "type": { "const": "COLOR" }, "scopes": { "type": "array", "items": { "type": "string" } } }
+        },
+        "existing": { "$ref": "#/$defs/Existing" },
+        "candidates": { "type": "array", "description": "review: existing variables with the same value and a compatible scope", "items": { "type": "object", "required": ["id", "name"], "properties": { "id": { "type": "string" }, "name": { "type": "string" } } } },
+        "members": { "type": "array", "description": "snapped near-equal keys merged into this leader", "items": { "type": "object", "required": ["key", "count"], "properties": { "key": { "type": "string" }, "count": { "type": "integer" }, "dev": { "type": "number" } } } },
+        "status": { "$ref": "#/$defs/Status" }
+      },
+      "allOf": [{ "if": { "properties": { "status": { "enum": ["bound", "create", "review"] } }, "required": ["status"] }, "then": { "required": ["target"] } }]
+    },
+    "GenericToken": {
+      "type": "object", "required": ["key", "count", "status"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^(g|t|r|sp|e|sz):" },
+        "count": { "type": "integer", "minimum": 1 },
+        "screens": { "type": "integer", "minimum": 1 },
+        "tailwind": { "type": "string" },
+        "target": {
+          "type": "object",
+          "properties": { "collection": { "type": "string" }, "name": { "type": "string" }, "style": { "type": "string" }, "type": { "enum": ["COLOR", "FLOAT", "STRING", "BOOLEAN"] }, "scopes": { "type": "array", "items": { "type": "string" } } },
+          "anyOf": [{ "required": ["name"] }, { "required": ["style"] }]
+        },
+        "existing": { "$ref": "#/$defs/Existing" },
+        "nearest": { "type": "string", "description": "off-scale: nearest token, e.g. 'radius/md(8)'" },
+        "status": { "$ref": "#/$defs/Status" }
+      },
+      "allOf": [{ "if": { "properties": { "status": { "enum": ["bound", "create", "review"] } }, "required": ["status"] }, "then": { "required": ["target", "screens"] } }]
+    }
+  }
+}

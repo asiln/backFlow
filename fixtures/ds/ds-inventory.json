@@ -1,0 +1,451 @@
+{
+ "$schema": "../../docs/ds-schema/inventory.schema.json",
+ "version": 1,
+ "file": "Sample Design System",
+ "generated": "2026-11-07T00:00:00.000Z",
+ "collections": [
+  {
+   "id": "VariableCollectionId:1:1",
+   "name": "Color",
+   "modes": [
+    {
+     "id": "1:0",
+     "name": "Light"
+    }
+   ]
+  },
+  {
+   "id": "VariableCollectionId:1:2",
+   "name": "Layout",
+   "modes": [
+    {
+     "id": "1:1",
+     "name": "Value"
+    }
+   ]
+  }
+ ],
+ "variables": [
+  {
+   "id": "VariableID:1:10",
+   "key": "ea583a81bcf9865d97210c1d0ab49df9e3bbb53f",
+   "name": "bg/page",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "FRAME_FILL",
+    "SHAPE_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.9608,
+     "g": 0.9647,
+     "b": 0.9725,
+     "a": 1
+    }
+   },
+   "codeSyntax": {
+    "WEB": "colors.page"
+   }
+  },
+  {
+   "id": "VariableID:1:11",
+   "key": "9b38d7b58542bc3fad9303e2c77186a7874c2896",
+   "name": "bg/surface",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "FRAME_FILL",
+    "SHAPE_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.9882,
+     "g": 0.9882,
+     "b": 0.9922,
+     "a": 1
+    }
+   },
+   "codeSyntax": {
+    "WEB": "colors.surface"
+   }
+  },
+  {
+   "id": "VariableID:1:12",
+   "key": "e0d3f04434ede9fbf29eb55097c98eede37e84bd",
+   "name": "bg/accent",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "FRAME_FILL",
+    "SHAPE_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.1843,
+     "g": 0.4353,
+     "b": 0.9294,
+     "a": 1
+    }
+   },
+   "codeSyntax": {
+    "WEB": "colors.accent"
+   }
+  },
+  {
+   "id": "VariableID:1:13",
+   "key": "987fb4c077e47a9b2620f10b73062a6836e7fe40",
+   "name": "bg/chip",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "FRAME_FILL",
+    "SHAPE_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.9098,
+     "g": 0.9216,
+     "b": 0.9412,
+     "a": 1
+    }
+   }
+  },
+  {
+   "id": "VariableID:1:14",
+   "key": "7d8e6cdc6fd4c834ab114a64cd26dc85724d4630",
+   "name": "bg/secondary-button",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "FRAME_FILL",
+    "SHAPE_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.9098,
+     "g": 0.9216,
+     "b": 0.9412,
+     "a": 1
+    }
+   }
+  },
+  {
+   "id": "VariableID:1:15",
+   "key": "64dee5407862b69fc6f0dfc2621ee425e90e3ac4",
+   "name": "border/default",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "STROKE_COLOR"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.8863,
+     "g": 0.898,
+     "b": 0.9176,
+     "a": 1
+    }
+   },
+   "codeSyntax": {
+    "WEB": "colors.line"
+   }
+  },
+  {
+   "id": "VariableID:1:16",
+   "key": "4d4c3447ff7067a9358c0ea6b49bc77e99688949",
+   "name": "text/primary",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "TEXT_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.1216,
+     "g": 0.1412,
+     "b": 0.1882,
+     "a": 1
+    }
+   },
+   "codeSyntax": {
+    "WEB": "colors.ink"
+   }
+  },
+  {
+   "id": "VariableID:1:17",
+   "key": "8f0bd976f5f8140cdeed59c23edc866cbd99e8b2",
+   "name": "text/dim",
+   "collection": "VariableCollectionId:1:1",
+   "type": "COLOR",
+   "scopes": [
+    "TEXT_FILL"
+   ],
+   "valuesByMode": {
+    "1:0": {
+     "r": 0.4196,
+     "g": 0.4471,
+     "b": 0.502,
+     "a": 1
+    }
+   },
+   "codeSyntax": {
+    "WEB": "colors.dim"
+   }
+  },
+  {
+   "id": "VariableID:1:20",
+   "key": "be874363794c893a4fcaddfe8fc3bd2a5e20a571",
+   "name": "radius/md",
+   "collection": "VariableCollectionId:1:2",
+   "type": "FLOAT",
+   "scopes": [
+    "CORNER_RADIUS"
+   ],
+   "valuesByMode": {
+    "1:1": 8
+   }
+  },
+  {
+   "id": "VariableID:1:21",
+   "key": "0d887bcad78b2c3fd8c8272204452c0b7445fced",
+   "name": "radius/lg",
+   "collection": "VariableCollectionId:1:2",
+   "type": "FLOAT",
+   "scopes": [
+    "CORNER_RADIUS"
+   ],
+   "valuesByMode": {
+    "1:1": 12
+   }
+  },
+  {
+   "id": "VariableID:1:22",
+   "key": "2d2cdd734a6ecd604c6c17bfd19412de9ea36ea2",
+   "name": "spacing/2",
+   "collection": "VariableCollectionId:1:2",
+   "type": "FLOAT",
+   "scopes": [
+    "GAP"
+   ],
+   "valuesByMode": {
+    "1:1": 8
+   }
+  },
+  {
+   "id": "VariableID:1:23",
+   "key": "507577690cee6d6142e158d60a5479c1f045677b",
+   "name": "spacing/3",
+   "collection": "VariableCollectionId:1:2",
+   "type": "FLOAT",
+   "scopes": [
+    "GAP"
+   ],
+   "valuesByMode": {
+    "1:1": 12
+   }
+  },
+  {
+   "id": "VariableID:1:24",
+   "key": "b650119bcdbc7119bc3900d9c432def11103653e",
+   "name": "spacing/4",
+   "collection": "VariableCollectionId:1:2",
+   "type": "FLOAT",
+   "scopes": [
+    "GAP"
+   ],
+   "valuesByMode": {
+    "1:1": 16
+   }
+  }
+ ],
+ "paintStyles": [],
+ "textStyles": [
+  {
+   "id": "S:text-body",
+   "key": "3f489dfaaf736bd1becd08d4552f1b53db31c01c",
+   "name": "Text/Body 14 Regular",
+   "fontName": {
+    "family": "Inter",
+    "style": "Regular"
+   },
+   "fontSize": 14,
+   "lineHeight": {
+    "unit": "PIXELS",
+    "value": 20
+   },
+   "letterSpacing": {
+    "unit": "PERCENT",
+    "value": 0
+   }
+  }
+ ],
+ "effectStyles": [],
+ "components": [
+  {
+   "id": "3:10",
+   "key": "8eac7bc73a337d89d239fbc5e4e91a40bce6232e",
+   "name": "Button",
+   "type": "COMPONENT_SET",
+   "page": "00 Design System",
+   "props": {
+    "Style": {
+     "type": "VARIANT",
+     "defaultValue": "Accent",
+     "variantOptions": [
+      "Accent",
+      "Neutral"
+     ]
+    },
+    "State": {
+     "type": "VARIANT",
+     "defaultValue": "Default",
+     "variantOptions": [
+      "Default",
+      "Disabled"
+     ]
+    },
+    "Label": {
+     "type": "TEXT",
+     "defaultValue": "Button"
+    },
+    "Show icon": {
+     "type": "BOOLEAN",
+     "defaultValue": false
+    },
+    "Icon": {
+     "type": "INSTANCE_SWAP",
+     "defaultValue": "3:2"
+    }
+   },
+   "variants": [
+    "Style=Accent, State=Default",
+    "Style=Neutral, State=Default",
+    "Style=Accent, State=Disabled"
+   ],
+   "fingerprint": {
+    "variants": {
+     "Style=Accent, State=Default": {
+      "t": "frame",
+      "k": "H",
+      "s": [
+       "H",
+       "H"
+      ],
+      "fills": [
+       "c:2f6fed@100"
+      ],
+      "radius": 8,
+      "h": 44,
+      "pad": [
+       12,
+       16,
+       12,
+       16
+      ],
+      "gap": 8,
+      "kids": [
+       {
+        "t": "text",
+        "fills": [
+         "c:ffffff@100"
+        ]
+       }
+      ]
+     },
+     "Style=Neutral, State=Default": {
+      "t": "frame",
+      "k": "H",
+      "s": [
+       "H",
+       "H"
+      ],
+      "fills": [
+       "c:e8ebf0@100"
+      ],
+      "radius": 8,
+      "h": 44,
+      "pad": [
+       12,
+       16,
+       12,
+       16
+      ],
+      "gap": 8,
+      "kids": [
+       {
+        "t": "text",
+        "fills": [
+         "c:1f2430@100"
+        ]
+       }
+      ]
+     },
+     "Style=Accent, State=Disabled": {
+      "t": "frame",
+      "k": "H",
+      "s": [
+       "H",
+       "H"
+      ],
+      "fills": [
+       "c:2f6fed@100"
+      ],
+      "radius": 8,
+      "h": 44,
+      "pad": [
+       12,
+       16,
+       12,
+       16
+      ],
+      "gap": 8,
+      "kids": [
+       {
+        "t": "text",
+        "fills": [
+         "c:ffffff@100"
+        ]
+       }
+      ]
+     }
+    }
+   }
+  },
+  {
+   "id": "3:20",
+   "key": "c6672ff1e367d619b1f9cb7b366b5675996a712b",
+   "name": "Divider",
+   "type": "COMPONENT",
+   "page": "00 Design System",
+   "props": {},
+   "fingerprint": {
+    "t": "frame",
+    "k": "N",
+    "s": [
+     "L",
+     "F"
+    ],
+    "fills": [
+     "c:e2e5ea@100"
+    ],
+    "h": 1,
+    "kids": []
+   }
+  }
+ ],
+ "icons": [
+  {
+   "id": "3:2",
+   "key": "acf9788b2193efb4d1205296e122c70102f045a7",
+   "name": "Bell",
+   "geom": "f30cbc5f46"
+  },
+  {
+   "id": "3:3",
+   "key": "c1a10272939ef05a2ae7a1ea9e0fb85e1f60dd9f",
+   "name": "User",
+   "geom": "76a720bb76"
+  }
+ ]
+}

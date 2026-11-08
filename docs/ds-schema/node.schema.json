@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/node.schema.json",
+  "title": "Backflow: export node (loose base schema + cmp/tok)",
+  "description": "Validates the fields every consumer relies on and the optional `cmp` / `tok` additions. Everything else is allowed (additionalProperties), so legacy exports without cmp/tok/ls and exports with future fields still pass. Child coordinates are relative to the parent.",
+  "$defs": {
+    "RGBA": {
+      "type": "object", "required": ["r", "g", "b"],
+      "properties": { "r": { "type": "number", "minimum": 0, "maximum": 1 }, "g": { "type": "number", "minimum": 0, "maximum": 1 }, "b": { "type": "number", "minimum": 0, "maximum": 1 }, "a": { "type": "number", "minimum": 0, "maximum": 1 } }
+    },
+    "Shadow": {
+      "type": "object", "required": ["c"],
+      "properties": { "c": { "$ref": "#/$defs/RGBA" }, "x": { "type": "number" }, "y": { "type": "number" }, "blur": { "type": "number" }, "spread": { "type": "number" }, "inset": { "type": "boolean" } }
+    },
+    "Layout": {
+      "type": "object",
+      "properties": {
+        "k": { "enum": ["H", "V", "W", "G", "N"] },
+        "s": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "enum": ["F", "H", "L"] } },
+        "g": { "type": "number" }, "g2": { "type": "number" },
+        "p": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } },
+        "bw": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number" } },
+        "abs": { "type": ["integer", "boolean"] }, "sp": { "type": ["integer", "boolean"] },
+        "tx": { "type": "object" }
+      }
+    },
+    "Node": {
+      "type": "object",
+      "required": ["t", "name", "x", "y", "w", "h"],
+      "properties": {
+        "t": { "enum": ["frame", "text", "svg", "img"] },
+        "name": { "type": "string" },
+        "x": { "type": "number" }, "y": { "type": "number" }, "w": { "type": "number", "minimum": 0 }, "h": { "type": "number", "minimum": 0 },
+        "fill": { "$ref": "#/$defs/RGBA" },
+        "stroke": { "type": "object", "properties": { "c": { "$ref": "#/$defs/RGBA" }, "w": { "type": "array", "items": { "type": "number" } }, "style": { "type": "string" } } },
+        "radius": { "oneOf": [{ "type": "number", "minimum": 0 }, { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number", "minimum": 0 } }] },
+        "shadow": { "type": "array", "items": { "$ref": "#/$defs/Shadow" } },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "clip": { "type": ["boolean", "integer"] },
+        "text": { "type": "string" },
+        "font": { "type": "object", "properties": { "family": { "type": "string" }, "size": { "type": "number" }, "weight": { "type": ["number", "string"] }, "lh": { "type": ["number", "null"] }, "ls": { "type": ["number", "null"] }, "color": { "$ref": "#/$defs/RGBA" } } },
+        "svg": { "type": "string" },
+        "ls": { "$ref": "#/$defs/Layout" },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/Node" } },
+        "cmp": { "$ref": "cmp.schema.json" },
+        "tok": { "$ref": "tok.schema.json" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$ref": "#/$defs/Node"
+}

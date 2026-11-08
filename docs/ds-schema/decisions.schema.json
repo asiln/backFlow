@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/asiln/backflow/docs/ds-schema/decisions.schema.json",
+  "title": "Backflow: component-decisions.json (spec 1.9, shape defined by T1)",
+  "description": "Owner decisions saved by the review report and applied by `componentize.mjs --decisions`. The spec only names the verbs (accept / reject / rename / merge / split / treat as variant of); this schema fixes the shape. A decision targets a cluster by `id` (stable library id, preferred) or `sig` (S digest of the cluster leader). Effects on the next run: reject -> exclude; rename -> nameSource 'owner' (conf 100); accept -> conf 100 / band auto; merge -> merge `id` into `into`; split -> re-cluster by the named field; variant-of -> make `id` a variant set member of `into`.",
+  "type": "object",
+  "required": ["version", "decisions"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "decisions": { "type": "array", "items": { "$ref": "#/$defs/Decision" } },
+    "exclude": { "type": "array", "items": { "type": "string" }, "description": "extra path globs, same syntax as ds.config.json exclude" }
+  },
+  "$defs": {
+    "Decision": {
+      "type": "object",
+      "required": ["action"],
+      "additionalProperties": false,
+      "anyOf": [{ "required": ["id"] }, { "required": ["sig"] }],
+      "properties": {
+        "id": { "type": "string", "pattern": "^cmp_" },
+        "sig": { "type": "string" },
+        "action": { "enum": ["accept", "reject", "rename", "merge", "split", "variant-of"] },
+        "name": { "type": "string", "minLength": 1, "description": "rename: new name, 'Group/Name' allowed" },
+        "group": { "type": "string" },
+        "into": { "type": "string", "pattern": "^cmp_", "description": "merge / variant-of: target component id" },
+        "by": { "enum": ["fill", "text", "size", "radius", "padding", "children"], "description": "split: the field that separates the new clusters" },
+        "props": { "type": "object", "description": "variant-of: variant property values for the member, e.g. { Type: 'Ghost' }", "additionalProperties": { "type": "string" } },
+        "note": { "type": "string" }
+      },
+      "allOf": [
+        { "if": { "properties": { "action": { "const": "rename" } }, "required": ["action"] }, "then": { "required": ["name"] } },
+        { "if": { "properties": { "action": { "enum": ["merge", "variant-of"] } }, "required": ["action"] }, "then": { "required": ["into"] } },
+        { "if": { "properties": { "action": { "const": "split" } }, "required": ["action"] }, "then": { "required": ["by"] } }
+      ]
+    }
+  }
+}

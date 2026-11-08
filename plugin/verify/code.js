@@ -1,4 +1,4 @@
-// Figma Lift Auto-layout Verify: runs the 9 experiments from docs/AUTO-LAYOUT-SPEC.md section D5 in throwaway nodes on the
+// Backflow Auto-layout Verify: runs the 9 experiments from docs/AUTO-LAYOUT-SPEC.md section D5 in throwaway nodes on the
 // current page, prints the answers and a ready-to-paste CFG block for plugin/code.js. It deletes everything it creates.
 // Run it in a scratch Figma file, then send the printed text back.
 figma.showUI(__html__, { width: 520, height: 600 });

@@ -201,7 +201,7 @@ Separate plugin `plugin-components/` (reads `_library.json`) builds the masters 
 
 ### 2.1 Where masters live, and the registry
 
-- A page named `Lift Components` (create if missing: `figma.createPage()` d.ts:447; loading other pages needs `figma.loadAllPagesAsync()`, `documentAccess: dynamic-page` in `plugin/manifest.json`, d.ts:8092-8129).
+- A page named `Backflow Components` (create if missing: `figma.createPage()` d.ts:447; loading other pages needs `figma.loadAllPagesAsync()`, `documentAccess: dynamic-page` in `plugin/manifest.json`, d.ts:8092-8129).
 - One Section per library group (`Buttons`, `Cards`, `Icons` ...), laid out by a simple grid; components inside Sections (Section does not auto-resize, `gotchas.md:804`, so size it explicitly like `plugin/code.js` does at the end of the import).
 - Each main component / component set is tagged: `node.setSharedPluginData('figmalift','cmp', id)`, `('figmalift','sig', S+M hash)`, `('figmalift','ver', libVersion)`, `('figmalift','conf', '87')` (d.ts:4152-4172). Lookup is one call: `page.findAllWithCriteria({ types:['COMPONENT','COMPONENT_SET'], sharedPluginData:{ namespace:'figmalift', keys:['cmp'] } })` (d.ts:4704-4761); this is indexed and fast on big pages (d.ts:4704, `figma.skipInvisibleInstanceChildren = true` d.ts:60 for traversals). Result goes into `Map<cmpId, node>`.
 - Idempotence: build only ids missing from the registry. If an id exists but `sig` differs, create a new node, rename the old `(superseded <date>)`, never delete.
@@ -359,7 +359,7 @@ Images in masters hold the exemplar's image (or a neutral gray placeholder if th
 
 Match is computed in Node (`dsmatch.mjs`) against an inventory exported from the live file (2.8.1). Never by name alone.
 
-**2.8.1 Inventory export.** A command of `plugin-tokens/` (`Export inventory`) walks `Lift Components` and `00 Design System` pages and writes `ds-inventory.json`: variables (id, key, name, collection, scopes, resolved value per mode), paint/text/effect styles (id, key, props), icon components (id, key, name, canonical SVG hash if the file keeps the source SVG in `setSharedPluginData('figmalift','svg', canonical)`, else vector path data hash from `VectorPath`s), components/sets (id, key, name, property definitions, variant list, and a **fingerprint tree**: `{t, k, s, kids, fills: tokenOrRgba, radius, h, pad, gap}` using the same `view()` mapping as 1.1: FRAME/COMPONENT -> frame, TEXT -> text, VECTOR or frame-with-vectors -> svg, INSTANCE -> frame or `C:`). `ds-ledger.json` is an early hand-made subset of this and can seed it (names, ids, hex).
+**2.8.1 Inventory export.** A command of `plugin-tokens/` (`Export inventory`) walks `Backflow Components` and `00 Design System` pages and writes `ds-inventory.json`: variables (id, key, name, collection, scopes, resolved value per mode), paint/text/effect styles (id, key, props), icon components (id, key, name, canonical SVG hash if the file keeps the source SVG in `setSharedPluginData('figmalift','svg', canonical)`, else vector path data hash from `VectorPath`s), components/sets (id, key, name, property definitions, variant list, and a **fingerprint tree**: `{t, k, s, kids, fills: tokenOrRgba, radius, h, pad, gap}` using the same `view()` mapping as 1.1: FRAME/COMPONENT -> frame, TEXT -> text, VECTOR or frame-with-vectors -> svg, INSTANCE -> frame or `C:`). `ds-ledger.json` is an early hand-made subset of this and can seed it (names, ids, hex).
 
 **2.8.2 Match score** between a cluster leader and a DS component (or each variant of a set):
 
@@ -510,7 +510,7 @@ Lookup, never duplicate:
 6. Effect styles: `figma.createEffectStyle()` (d.ts:685), effects array, colour variable bound with `setBoundVariableForEffect(effect,'color',var)` (d.ts:1227; returns a new effect).
 7. Gradient paints: `figma.createPaintStyle()` (d.ts:673). Gradient stops can carry a bound variable (`ColorStop.boundVariables`, d.ts:2507-2521; call form `UNVERIFIED`, E12).
 
-**Dry-run** performs every lookup and prints the same `tokens.json` statuses with real ids: "would create 14 variables (list), would create 3 text styles, would bind 18,230 fills", and writes a `figma-lift-dry-run.json` into the UI for download. No `create*`, no `set*` is called when dry-run is on (guard in one wrapper `W.create(kind, fn)`).
+**Dry-run** performs every lookup and prints the same `tokens.json` statuses with real ids: "would create 14 variables (list), would create 3 text styles, would bind 18,230 fills", and writes a `backflow-dry-run.json` into the UI for download. No `create*`, no `set*` is called when dry-run is on (guard in one wrapper `W.create(kind, fn)`).
 
 **Binding** (inside the import plugin and for components in `plugin-components`): replace the exact-RGBA map `loadColorVariables` by a keyed map `tokenKey -> Variable` built from `tok` keys (section 7.2) so binding no longer depends on re-matching floats, and so the *role* decides which variable of equal value is used (today the scoring is `Color` > other > `Primitives` only). Bindings by field: fills/strokes `setBoundVariableForPaint` (d.ts:1215), gap `setBoundVariable('itemSpacing',v)`, `counterAxisSpacing`, padding four fields, corner radii individual corners `topLeftRadius...` (vp.md:87-120), `strokeWeight`, text style `await t.setTextStyleIdAsync(id)` (d.ts:8572; batches of 100 with `Promise.all`), effect style `await n.setEffectStyleIdAsync(id)` (d.ts:5179). Text style first, then re-apply `runs` ranges (a style write replaces range overrides; VERIFY E11). Bind only when the value the plugin actually sets equals the variable's value (e.g. padding after `bw` subtraction).
 
@@ -530,7 +530,7 @@ tokens.mjs        --in out/**/*.figma.json  --tailwind ... --inventory ds-invent
 plugin-tokens     (Figma) dry-run -> apply tokens.json; "Export inventory" -> ds-inventory.json
 componentize.mjs  --in out/**/*.figma.json --tokens out/enriched/tokens.json --inventory ds-inventory.json --decisions component-decisions.json
                   -> out/enriched/_library.json, out/enriched/<file>.figma.json (adds cmp/tok), components-report.{json,md,html}
-plugin-components (Figma) _library.json -> "Lift Components" page (masters, sets, icons), registry tags
+plugin-components (Figma) _library.json -> "Backflow Components" page (masters, sets, icons), registry tags
 plugin (import)   enriched/<file>.figma.json -> screens with instances + token bindings; verification report
 expand.mjs        enriched -> expand cmp back into plain trees; compare with the original JSON (Node round trip)
 ```
@@ -698,7 +698,7 @@ interface LibIcon {
 | Plugin instancing, overrides, ladder, verification | Fonts and `fontMap` (this project: Vazirmatn/Space Grotesk/JetBrains Mono; RTL ordering is already handled by `normalize.mjs`) |
 | Registry via shared plugin data | Role-prefix table (`nameHints.roles`), variant value dictionary (`variantNames`), group names, DS match mode |
 
-Principle for generalisation: no colour, name or font literal in code; every project-specific string lives in `ds.config.json` or in `tailwind.config.js`. Package as `figma-lift` (Node CLI: `ds tokens`, `ds components`, `ds expand`) plus the two Figma plugins. RTL specifics (ordering by visual x) are upstream in `normalize.mjs`, so downstream steps are direction-agnostic.
+Principle for generalisation: no colour, name or font literal in code; every project-specific string lives in `ds.config.json` or in `tailwind.config.js`. Package as `backflow` (Node CLI: `ds tokens`, `ds components`, `ds expand`) plus the two Figma plugins. RTL specifics (ordering by visual x) are upstream in `normalize.mjs`, so downstream steps are direction-agnostic.
 
 ## 9. Experiments to run in real Figma first (extend `plugin/verify/`, new plugin `plugin/verify-ds/`)
 
@@ -773,7 +773,7 @@ Work split so that agents do not touch the same files. Each task lists owned pat
 | T3 Tokens plugin | `plugin-tokens/*` (manifest, code.js, ui.html) | T1 fixtures | dry-run, create-if-missing variables/text/effect styles, inventory export, idempotence |
 | T4 Component detector core | `componentize.mjs`, `tools/ds/components/{view,digest,cluster,nest,name,confidence,library}.mjs` | T1 | passes 1-4, tolerance clustering, naming, confidence, `_library.json` (no variants), enriched JSON with `cmp.id` + text overrides only |
 | T5 Icons | `tools/ds/icons/*` | T1 | `iconSig`, icon clustering, DS icon match from ledger/inventory, `icons[]` in the library |
-| T6 Components plugin | `plugin-components/*` | T1 fixtures | registry, `Lift Components` page, masters, TEXT/BOOLEAN/INSTANCE_SWAP properties, icon components, dry-run |
+| T6 Components plugin | `plugin-components/*` | T1 fixtures | registry, `Backflow Components` page, masters, TEXT/BOOLEAN/INSTANCE_SWAP properties, icon components, dry-run |
 | T7 Import plugin integration | `plugin/code.js`, `plugin/ui.html` (single owner) | T1 fixtures, T6 conventions | `tryInstance`, overrides, token binding by key, verify + ladder R0-R3, stats, `Use components` / `Bind tokens` options; legacy path untouched when fields absent |
 | T8 Round-trip verifier | `expand.mjs`, `tools/ds/verify/*` | T1, T4 | Node `expand` + compare (5.6.1), run in CI over `out/` |
 

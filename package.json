@@ -1,16 +1,68 @@
 {
-  "name": "figma-lift",
-  "version": "0.1.0",
-  "description": "Turn a running web app into real Figma auto-layout, components and design tokens. Works with React, Tailwind or any site.",
-  "private": false,
+  "name": "@backflow/cli",
+  "version": "1.0.0",
+  "description": "Your running web app, drawn as built in Figma: real auto-layout, design tokens, components and variants. Local, no API quota.",
   "license": "MIT",
   "type": "module",
-  "repository": { "type": "git", "url": "git+https://github.com/asiln/figma-lift.git" },
-  "bugs": { "url": "https://github.com/asiln/figma-lift/issues" },
-  "keywords": ["figma", "figma-plugin", "html-to-figma", "auto-layout", "design-tokens", "playwright"],
-  "engines": { "node": ">=18" },
-  "scripts": {
-    "check": "node scripts/check.mjs"
+  "bin": {
+    "backflow": "bin/backflow.mjs"
   },
-  "dependencies": { "playwright-core": "^1.49.0" }
+  "homepage": "https://github.com/asiln/backflow#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asiln/backflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/asiln/backflow/issues"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/asiln"
+  },
+  "keywords": [
+    "figma",
+    "figma-plugin",
+    "html-to-figma",
+    "code-to-design",
+    "auto-layout",
+    "design-tokens",
+    "design-system",
+    "playwright"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "extract.mjs",
+    "run-all.mjs",
+    "pipeline.mjs",
+    "pipeline-lib.mjs",
+    "diff.mjs",
+    "tokens.mjs",
+    "componentize.mjs",
+    "normalize.mjs",
+    "layout-sim.mjs",
+    "walker.js",
+    "browser.mjs",
+    "config.mjs",
+    "tools/ds/",
+    "!tools/ds/**/*.test.mjs",
+    "docs/ds-schema/",
+    "plugin-lift/",
+    "backflow.config.example.json",
+    "batches.example/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "build:lift": "node scripts/build-lift.mjs",
+    "validate:ds": "node scripts/validate-ds.mjs",
+    "test": "node scripts/run-tests.mjs",
+    "build:brand": "node scripts/build-brand.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.49.0"
+  }
 }

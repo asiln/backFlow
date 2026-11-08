@@ -1,6 +1,6 @@
 # Code of Conduct
 
-We want Figma Lift to be a welcoming project for everyone.
+We want Backflow to be a welcoming project for everyone.
 
 **Expected:** be respectful and constructive, assume good intent, give and accept feedback graciously, focus on what is best for the project and its users.
 
