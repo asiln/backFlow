@@ -1,0 +1,3 @@
+# Only the landing site is deployed. Everything else (exports, batches, sessions, config) stays local.
+/*
+!/site

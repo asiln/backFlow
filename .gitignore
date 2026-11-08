@@ -10,3 +10,6 @@ figma-lift.config.json
 *.bundle
 .impeccable
 fixtures/big.png
+
+.vercel
+.env*
