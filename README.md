@@ -9,6 +9,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/backflow-cli"><img alt="npm" src="https://img.shields.io/npm/v/backflow-cli?style=flat-square&color=1f4fa8&label=npm"></a>
+  <a href="https://www.figma.com/community/plugin/1701263956497261578"><img alt="Figma Community" src="https://img.shields.io/badge/Figma%20Community-Backflow-1f4fa8?style=flat-square"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-1f4fa8?style=flat-square"></a>
   <img alt="Runs on localhost only" src="https://img.shields.io/badge/runs%20on-localhost%20only-23704a?style=flat-square">
   <img alt="Node 18 or newer" src="https://img.shields.io/badge/node-%E2%89%A518-1b1f24?style=flat-square">
@@ -29,7 +30,7 @@ npx backflow-cli extract screens.json  # -> out/screens.figma.json, plus a repor
 npx backflow-cli plugin                # copies the Figma plugin to ./backflow-figma-plugin
 ```
 
-In **Figma desktop**: Plugins → Development → Import plugin from manifest → `backflow-figma-plugin/manifest.json`. Run **Backflow** and drop `out/screens.figma.json` anywhere on its window.
+In **Figma**: install **[Backflow from Figma Community](https://www.figma.com/community/plugin/1701263956497261578)**, run it, and drop `out/screens.figma.json` anywhere on its window. (To run the copy in this repo instead: Plugins → Development → Import plugin from manifest → `plugin-lift/manifest.json`, or the folder `npx backflow-cli plugin` makes.)
 
 For a design system too, harvest tokens and components first, then drop all three files on the plugin (Tokens → Components → Screens):
 

@@ -33,7 +33,8 @@ ${Object.entries(SCRIPTS).map(([k, [, , d]]) => `  ${k.padEnd(w)}  ${d}`).join('
 Quick start:
   npx backflow-cli init                 # then list your screens in screens.json
   npx backflow-cli extract screens.json # -> out/screens.figma.json
-  npx backflow-cli plugin               # import its manifest.json in Figma desktop, drop the JSON on it
+  Then open the Backflow plugin in Figma (Figma Community) and drop the JSON on it.
+  Or: npx backflow-cli plugin          # a local copy to import in Figma desktop
 
 Localhost only. Use test accounts; the password comes from $BACKFLOW_TEST_PASSWORD.
 Docs: ${pkg.homepage || 'https://github.com/asiln/backflow'}`);

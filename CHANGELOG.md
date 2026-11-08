@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.1 (2026-11-08)
+
+- Backflow is on Figma Community: https://www.figma.com/community/plugin/1701263956497261578
+- The plugin manifest carries its registered Figma ID, so local copies (`npx backflow-cli plugin`, the release zip) match the published plugin.
+- README, site and CLI help link to the Community plugin; site at https://backflow-site.vercel.app.
+
 ## v1.0.0 (2026-11)
 
 First release as **Backflow** (formerly Figma Lift).
